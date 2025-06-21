@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Store,
   Calendar,
@@ -9,27 +9,52 @@ import {
   Mail,
   FileText,
 } from "lucide-react";
+import { url } from "@/store/api";
+import axios from "axios";
 
 export default function VendorDashboard() {
-  const storeData = {
-    _id: "6841fcac94bbd8a5e05e27c0",
-    user: {
-      _id: "683723d651450f62a0c9c91b",
-      email: "kingwaretech@gmail.com",
-    },
-    storeName: "Kingware Store",
-    storeDescription: "Kingware Store Description",
-    isApproved: false,
-    balance: 0,
-    subaccountCode: "ACCT_7zenfk2kr6tnj8e",
-    logo: "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154981/trustmart/mieeq3d1ypiicddy5ws3.png",
-    businessCertificate:
-      "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154985/trustmart/leida7cinyfhoo3lnq6c.png",
-    products: [],
-    createdAt: "2025-06-05T20:23:08.302Z",
-    updatedAt: "2025-06-05T20:23:08.302Z",
-    __v: 0,
-  };
+  const [storeData, setStoreData] = useState(null);
+
+  useEffect(() => {
+    const fetchVendor = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${url}vendors/me`, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        setStoreData(response.data.vendor);
+      } catch (error) {
+        console.error(
+          "Failed to fetch vendor profile:",
+          error.response?.data || error.message
+        );
+      }
+    };
+
+    fetchVendor();
+  }, []);
+
+  // const storeData = {
+  //   _id: "6841fcac94bbd8a5e05e27c0",
+  //   user: {
+  //     _id: "683723d651450f62a0c9c91b",
+  //     email: "kingwaretech@gmail.com",
+  //   },
+  //   storeName: "Kingware Store",
+  //   storeDescription: "Kingware Store Description",
+  //   isApproved: false,
+  //   balance: 0,
+  //   subaccountCode: "ACCT_7zenfk2kr6tnj8e",
+  //   logo: "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154981/trustmart/mieeq3d1ypiicddy5ws3.png",
+  //   businessCertificate:
+  //     "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154985/trustmart/leida7cinyfhoo3lnq6c.png",
+  //   products: [],
+  //   createdAt: "2025-06-05T20:23:08.302Z",
+  //   updatedAt: "2025-06-05T20:23:08.302Z",
+  //   __v: 0,
+  // };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -53,14 +78,16 @@ export default function VendorDashboard() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">
-                  {storeData.storeName}
+                  {storeData?.storeName || "Store Name"}
                 </h1>
-                <p className="text-gray-600">{storeData.storeDescription}</p>
+                <p className="text-gray-600">
+                  {storeData?.storeDescription || "Store Description"}
+                </p>
               </div>
             </div>
 
             <div className="flex items-center space-x-2">
-              {storeData.isApproved ? (
+              {storeData?.isApproved ? (
                 <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full">
                   <CheckCircle className="w-4 h-4 mr-1" />
                   <span className="text-sm font-medium">Approved</span>
@@ -82,7 +109,7 @@ export default function VendorDashboard() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200">
                 <img
-                  src={storeData.logo}
+                  src={storeData?.logo}
                   alt="Store Logo"
                   className="w-full h-48 object-contain rounded-lg"
                   onError={(e) => {
@@ -103,7 +130,7 @@ export default function VendorDashboard() {
               </h3>
               <div className="bg-gray-50 rounded-lg p-4 border-2 border-dashed border-gray-200">
                 <img
-                  src={storeData.businessCertificate}
+                  src={storeData?.businessCertificate}
                   alt="Business Certificate"
                   className="w-full h-48 object-contain rounded-lg"
                   onError={(e) => {
@@ -132,23 +159,25 @@ export default function VendorDashboard() {
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">Store ID</span>
                 <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                  {storeData._id}
+                  {storeData?._id || "N/A"}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">User Email</span>
-                <span className="text-blue-600">{storeData.user.email}</span>
+                <span className="text-blue-600">
+                  {storeData?.user.email || "N/A"}
+                </span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">User ID</span>
                 <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                  {storeData.user._id}
+                  {storeData?.user._id || "N/A"}
                 </span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-gray-600">Subaccount Code</span>
                 <span className="text-sm font-mono bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                  {storeData.subaccountCode}
+                  {storeData?.subaccountCode || "N/A"}
                 </span>
               </div>
             </div>
@@ -166,7 +195,7 @@ export default function VendorDashboard() {
                   <div>
                     <p className="text-gray-600 text-sm">Current Balance</p>
                     <p className="text-2xl font-bold text-green-600">
-                      ₦{storeData.balance.toFixed(2)}
+                      ₦{storeData?.balance?.toFixed(2) || "0.00"}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -182,7 +211,7 @@ export default function VendorDashboard() {
                   <div>
                     <p className="text-gray-600 text-sm">Total Products</p>
                     <p className="text-2xl font-bold text-indigo-600">
-                      {storeData.products.length}
+                      {storeData?.products.length || 0}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
@@ -206,7 +235,7 @@ export default function VendorDashboard() {
               <div>
                 <p className="font-medium text-gray-800">Store Created</p>
                 <p className="text-gray-600 text-sm">
-                  {formatDate(storeData.createdAt)}
+                  {formatDate(storeData?.createdAt) || "N/A"}
                 </p>
               </div>
             </div>
@@ -215,7 +244,7 @@ export default function VendorDashboard() {
               <div>
                 <p className="font-medium text-gray-800">Last Updated</p>
                 <p className="text-gray-600 text-sm">
-                  {formatDate(storeData.updatedAt)}
+                  {formatDate(storeData?.updatedAt) || "N/A"}
                 </p>
               </div>
             </div>
