@@ -183,7 +183,7 @@ function ShoppingHeader() {
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" size="icon" className="lg:hidden">
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6 text-black" />
               <span className="sr-only">Toggle header menu</span>
             </Button>
           </SheetTrigger>

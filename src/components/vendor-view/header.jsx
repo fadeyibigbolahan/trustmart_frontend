@@ -18,10 +18,10 @@ function VendorHeader({ setOpen }) {
         <AlignJustify />
         <span className="sr-only">Toggle Menu</span>
       </Button>
-      <div className="flex flex-1 justify-end">
+      <div className="flex flex-1 justify-end text-xs m-2">
         <Button
           onClick={() => navigate("/")}
-          className="inline-flex gap-2 items-center rounded-md px-4 py-2 text-sm font-medium shadow"
+          className="inline-flex gap-2 items-center rounded-md p-2 text-sm font-medium shadow"
         >
           <LogOut />
           Homepage

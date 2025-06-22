@@ -71,16 +71,16 @@ export default function VendorDashboard() {
       <div className="max-w-4xl mx-auto">
         {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col md:flex-row gap-2 items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row items-center space-x-4">
               <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
                 <Store className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">
+                <h1 className="text-xl font-bold text-gray-800 text-center md:text-start">
                   {storeData?.storeName || "Store Name"}
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-600 text-center md:text-start">
                   {storeData?.storeDescription || "Store Description"}
                 </p>
               </div>

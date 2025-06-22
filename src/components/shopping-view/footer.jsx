@@ -140,14 +140,14 @@ const Footer = () => {
               </div>
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-gray-400" />
-                <span className="text-gray-300 text-sm">+1 (555) 123-4567</span>
+                <span className="text-gray-300 text-sm">+234 904 526 5352</span>
               </div>
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                 <span className="text-gray-300 text-sm">
-                  123 Commerce St
+                  123 Address,
                   <br />
-                  New York, NY 10001
+                  State, Country
                 </span>
               </div>
             </div>
@@ -199,7 +199,7 @@ const Footer = () => {
                 Cookie Policy
               </a>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm">We accept:</span>
               <div className="flex gap-1">
                 {["VISA", "MC", "AMEX", "PAYPAL"].map((payment) => (
@@ -211,7 +211,7 @@ const Footer = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
