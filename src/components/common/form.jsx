@@ -40,19 +40,27 @@ function CommonForm({
     switch (getControlItem.componentType) {
       case "input":
         return (
-          <Input
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            id={getControlItem.name}
-            type={getControlItem.type}
-            value={value}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
-            }
-          />
+          <div className="relative">
+            <Input
+              name={getControlItem.name}
+              placeholder={getControlItem.placeholder}
+              id={getControlItem.name}
+              type={getControlItem.type}
+              value={value}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  [getControlItem.name]: event.target.value,
+                })
+              }
+              className={getControlItem.endIcon ? "pr-10" : ""}
+            />
+            {getControlItem.endIcon && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {getControlItem.endIcon}
+              </div>
+            )}
+          </div>
         );
 
       case "select":
@@ -163,19 +171,27 @@ function CommonForm({
 
       default:
         return (
-          <Input
-            name={getControlItem.name}
-            placeholder={getControlItem.placeholder}
-            id={getControlItem.name}
-            type={getControlItem.type}
-            value={value}
-            onChange={(event) =>
-              setFormData({
-                ...formData,
-                [getControlItem.name]: event.target.value,
-              })
-            }
-          />
+          <div className="relative">
+            <Input
+              name={getControlItem.name}
+              placeholder={getControlItem.placeholder}
+              id={getControlItem.name}
+              type={getControlItem.type}
+              value={value}
+              onChange={(event) =>
+                setFormData({
+                  ...formData,
+                  [getControlItem.name]: event.target.value,
+                })
+              }
+              className={getControlItem.endIcon ? "pr-10" : ""}
+            />
+            {getControlItem.endIcon && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {getControlItem.endIcon}
+              </div>
+            )}
+          </div>
         );
     }
   }

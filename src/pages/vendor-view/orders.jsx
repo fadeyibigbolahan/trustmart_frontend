@@ -2,7 +2,7 @@ import VendorOrdersView from "@/components/vendor-view/orders";
 
 function VendorOrders() {
   return (
-    <div>
+    <div className="w-full overflow-x-auto">
       <VendorOrdersView />
     </div>
   );

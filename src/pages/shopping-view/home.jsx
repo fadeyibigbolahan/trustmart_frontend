@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import heroOne from "../../assets/hero1.png";
-import heroTwo from "../../assets/hero2.png";
-import heroThree from "../../assets/hero3.png";
+import heroOne from "../../assets/hero1.webp";
+import heroTwo from "../../assets/hero2.webp";
+import heroThree from "../../assets/hero3.webp";
 import {
   Airplay,
   BabyIcon,
@@ -160,7 +160,7 @@ function ShoppingHome() {
             <img
               key={index}
               src={slide?.image}
-              className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              className={`absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ${
                 index === currentSlide ? "opacity-100" : "opacity-0"
               }`}
             />
@@ -171,7 +171,7 @@ function ShoppingHome() {
           <>
             <Button
               variant="outline"
-              size="icon"
+              size="small"
               onClick={() =>
                 setCurrentSlide(
                   (prev) => (prev - 1 + fImageList.length) % fImageList.length
@@ -183,7 +183,7 @@ function ShoppingHome() {
             </Button>
             <Button
               variant="outline"
-              size="icon"
+              size="small"
               onClick={() =>
                 setCurrentSlide((prev) => (prev + 1) % fImageList.length)
               }

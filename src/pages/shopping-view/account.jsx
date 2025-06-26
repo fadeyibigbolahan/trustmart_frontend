@@ -13,8 +13,8 @@ function ShoppingAccount() {
           className="h-full w-full object-cover object-center"
         />
       </div>
-      <div className="container mx-auto grid grid-cols-1 gap-8 py-8">
-        <div className="flex flex-col rounded-lg border bg-background p-6 shadow-sm">
+      <div className="container mx-auto grid grid-cols-1 gap-4 py-4">
+        <div className="flex flex-col rounded-lg border bg-background p-2 md:p-6 shadow-sm w-full">
           <Tabs defaultValue="orders">
             <TabsList>
               <TabsTrigger value="orders">Orders</TabsTrigger>
