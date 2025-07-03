@@ -2,7 +2,7 @@ import AdminOrdersView from "@/components/admin-view/orders";
 
 function AdminOrders() {
   return (
-    <div>
+    <div className="w-full overflow-x-auto">
       <AdminOrdersView />
     </div>
   );

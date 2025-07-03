@@ -6,6 +6,7 @@ import {
   Store,
   User,
   UserCog,
+  Search,
 } from "lucide-react";
 import {
   Link,
@@ -172,6 +173,7 @@ function HeaderRightContent() {
 
 function ShoppingHeader() {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-[#0057B8] text-white">
@@ -180,18 +182,36 @@ function ShoppingHeader() {
           <img src={trustmartlogo} className="w-[50px]" alt="" srcset="" />
           <span className="font-bold">Trustmart</span>
         </Link>
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="lg:hidden">
-              <Menu className="h-6 w-6 text-black" />
-              <span className="sr-only">Toggle header menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-full max-w-xs">
-            <MenuItems />
-            <HeaderRightContent />
-          </SheetContent>
-        </Sheet>
+        <div className="flex items-center gap-2 lg:hidden">
+          {/* Search icon */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="text-black"
+            onClick={() => {
+              // Handle search open – you can navigate or toggle modal
+              navigate("/search");
+            }}
+          >
+            <Search className="h-6 w-6" />
+            <span className="sr-only">Search</span>
+          </Button>
+
+          {/* Menu toggle */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="text-black">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle header menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-full max-w-xs">
+              <MenuItems />
+              <HeaderRightContent />
+            </SheetContent>
+          </Sheet>
+        </div>
+
         <div className="hidden lg:block">
           <MenuItems />
         </div>

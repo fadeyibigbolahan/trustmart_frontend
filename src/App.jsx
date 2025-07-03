@@ -105,6 +105,21 @@ function App() {
 
         {/* 🛠 Admin Routes */}
         <Route
+          path="/admin"
+          element={
+            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
+              <AdminLayout />
+            </CheckAuth>
+          }
+        >
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="features" element={<AdminFeatures />} />
+        </Route>
+
+        {/* 🛠 Vendor Routes */}
+        <Route
           path="/vendor"
           element={
             // <CheckAuth isAuthenticated={isAuthenticated} user={user}>
@@ -117,18 +132,6 @@ function App() {
           <Route path="orders" element={<VendorOrders />} />
           <Route path="features" element={<VendorFeatures />} />
         </Route>
-
-        {/* 🛒 Vendor Routes (Commented Out for Now) */}
-        {/* <Route
-          path="/vendor"
-          element={
-            <CheckAuth isAuthenticated={isAuthenticated} user={user}>
-              <VendorLayout />
-            </CheckAuth>
-          }
-        >
-          <Route path="dashboard" element={<VendorDashboard />} />
-        </Route> */}
 
         {/* 🚫 Unauthorized / Fallback */}
         <Route path="/unauth-page" element={<UnauthPage />} />
