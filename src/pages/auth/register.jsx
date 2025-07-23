@@ -10,6 +10,7 @@ import { Eye, EyeOff } from "lucide-react";
 const initialState = {
   userName: "",
   email: "",
+  school: "",
   password: "",
   confirmPassword: "",
 };

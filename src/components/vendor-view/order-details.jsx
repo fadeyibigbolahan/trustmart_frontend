@@ -124,9 +124,9 @@ function VendorOrderDetailsView({ orderDetails }) {
                 options: [
                   { id: "pending", label: "Pending" },
                   { id: "inProcess", label: "In Process" },
-                  { id: "inShipping", label: "In Shipping" },
-                  { id: "delivered", label: "Delivered" },
-                  { id: "rejected", label: "Rejected" },
+                  // { id: "inShipping", label: "In Shipping" },
+                  // { id: "delivered", label: "Delivered" },
+                  // { id: "rejected", label: "Rejected" },
                 ],
               },
             ]}
