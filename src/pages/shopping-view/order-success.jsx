@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { url } from "@/store/api";
 
 const OrderSuccessPage = () => {
-  const location = useLocation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Extract reference from the query string manually
-  const searchParams = new URLSearchParams(location.search);
-  const reference = searchParams.get("reference");
+  // Manually extract reference from URL (since it's before the hash)
+  const extractReference = () => {
+    const match = window.location.href.match(/[?&]reference=([^&]+)/);
+    return match ? match[1] : null;
+  };
 
   useEffect(() => {
+    const reference = extractReference();
+    if (!reference) return setLoading(false);
+
     const verifyTransaction = async () => {
       try {
         const response = await axios.get(
@@ -26,15 +29,10 @@ const OrderSuccessPage = () => {
       }
     };
 
-    if (reference) {
-      verifyTransaction();
-    } else {
-      setLoading(false);
-    }
-  }, [reference]);
+    verifyTransaction();
+  }, []);
 
   if (loading) return <p>Verifying payment...</p>;
-
   if (!order) return <p>Could not verify your payment.</p>;
 
   return (
