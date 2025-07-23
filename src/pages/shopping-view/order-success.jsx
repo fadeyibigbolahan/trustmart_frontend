@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { url } from "@/store/api";
 
 const OrderSuccessPage = () => {
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Extract reference from the query string manually
+  const searchParams = new URLSearchParams(location.search);
   const reference = searchParams.get("reference");
 
   useEffect(() => {
@@ -26,6 +28,8 @@ const OrderSuccessPage = () => {
 
     if (reference) {
       verifyTransaction();
+    } else {
+      setLoading(false);
     }
   }, [reference]);
 
