@@ -168,18 +168,12 @@ export default function VendorDashboard() {
                   {storeData?.user.email || "N/A"}
                 </span>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-gray-100">
+              {/* <div className="flex justify-between items-center py-2 border-b border-gray-100">
                 <span className="text-gray-600">User ID</span>
                 <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
                   {storeData?.user._id || "N/A"}
                 </span>
-              </div>
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Subaccount Code</span>
-                <span className="text-sm font-mono bg-indigo-100 text-indigo-800 px-2 py-1 rounded">
-                  {storeData?.subaccountCode || "N/A"}
-                </span>
-              </div>
+              </div> */}
             </div>
           </div>
 
