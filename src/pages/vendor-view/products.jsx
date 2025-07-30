@@ -25,7 +25,6 @@ const initialFormData = {
   title: "",
   description: "",
   category: "",
-  brand: "",
   price: "",
   salePrice: "",
   totalStock: "",
@@ -62,11 +61,6 @@ function VendorProducts() {
         formPayload.append(key, value);
       }
     });
-
-    // Append vendorId here
-    // if (vendor && vendor._id) {
-    //   formPayload.append("vendor", vendor._id);
-    // }
 
     if (currentEditedId !== null) {
       // Optionally send FormData here too if edit requires image update
@@ -106,7 +100,6 @@ function VendorProducts() {
       "title",
       "description",
       "category",
-      "brand",
       "price",
       "totalStock",
     ];

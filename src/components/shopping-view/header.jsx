@@ -7,6 +7,8 @@ import {
   User,
   UserCog,
   Search,
+  ChevronDown,
+  Grid3X3,
 } from "lucide-react";
 import {
   Link,
@@ -35,10 +37,183 @@ import { Label } from "../ui/label";
 import { use } from "react";
 import trustmartlogo from "../../assets/trustmartlogo.png";
 
+// Organized Trustmart categories
+const trustmartCategoryGroups = {
+  "Fashion & Accessories": [
+    { id: "mens-clothing", label: "Men's Clothing" },
+    { id: "womens-clothing", label: "Women's Clothing" },
+    { id: "footwear", label: "Footwear" },
+    { id: "bags-backpacks", label: "Bags & Backpacks" },
+    { id: "jewelry-accessories", label: "Jewelry & Accessories" },
+    { id: "caps-hats", label: "Caps & Hats" },
+    { id: "native-wear", label: "Native Wear & Tailoring" },
+  ],
+  "Phones & Gadgets": [
+    { id: "phones", label: "Phones" },
+    { id: "earphones-headsets", label: "Earphones & Headsets" },
+    { id: "chargers-powerbanks", label: "Chargers & Power Banks" },
+    { id: "watches", label: "Watches" },
+    { id: "smartwatches", label: "Smartwatches" },
+    { id: "phone-accessories", label: "Phone Accessories" },
+    { id: "game-consoles", label: "Game Consoles" },
+    { id: "smart-home", label: "Smart Home Devices" },
+    { id: "wearable-tech", label: "Wearable Tech" },
+  ],
+  "Beauty & Personal Care": [
+    { id: "skincare", label: "Skincare Products" },
+    { id: "hair-products", label: "Hair Products" },
+    { id: "wigs-extensions", label: "Wigs & Extensions" },
+    { id: "makeup-kits", label: "Makeup Kits" },
+    { id: "fragrances", label: "Fragrances & Body Sprays" },
+    { id: "barbering-services", label: "Barbering & Hair Styling" },
+  ],
+  "Academic & Stationery": [
+    { id: "textbooks", label: "Handouts & Textbooks" },
+    { id: "course-materials", label: "Course Materials" },
+    { id: "school-stationery", label: "School Bags & Stationery" },
+  ],
+  "Home & Room Essentials": [
+    { id: "bedsheets-duvets", label: "Bedsheets & Duvets" },
+    { id: "curtains", label: "Curtains" },
+    { id: "room-decor", label: "Room Décor" },
+    { id: "rechargeable-lamps", label: "Rechargeable Lamps" },
+    { id: "mini-fans", label: "Mini Fans" },
+    { id: "cleaning-supplies", label: "Cleaning Supplies" },
+  ],
+  "Footwear & Sneakers": [
+    { id: "campus-sneakers", label: "Campus Trend Sneakers" },
+    { id: "sandals-slides", label: "Sandals & Slides" },
+    { id: "custom-footwear", label: "Custom Footwear" },
+  ],
+  Giftings: [
+    { id: "surprise-packages", label: "Surprise Packages" },
+    { id: "gift-boxes", label: "Gift Boxes" },
+    { id: "customizable-items", label: "Customizable Items" },
+    { id: "balloons-decor", label: "Balloons & Decor Items" },
+  ],
+  "Health & Wellness": [
+    { id: "fitness-equipment", label: "Fitness Equipment" },
+    { id: "sanitary-hygiene", label: "Sanitary & Hygiene Products" },
+  ],
+  Electronics: [
+    { id: "bluetooth-speakers", label: "Bluetooth Speakers" },
+    { id: "rechargeable-fans", label: "Rechargeable Fans" },
+    { id: "desk-lamps", label: "Desk Lamps" },
+    { id: "mini-appliances", label: "Mini Appliances" },
+  ],
+  "Religious & Spiritual": [
+    { id: "religious-books", label: "Anointing Oils & Books" },
+    { id: "bible-covers", label: "Customized Bible Covers" },
+    { id: "christian-wear", label: "Christian Tees & Wristbands" },
+  ],
+  Automotive: [
+    { id: "car-accessories", label: "Car Accessories" },
+    { id: "car-care", label: "Car Care" },
+    { id: "tools", label: "Tools" },
+    { id: "garage-organization", label: "Garage Organization" },
+  ],
+  "Arts & Crafts": [
+    { id: "painting-supplies", label: "Painting Supplies" },
+    { id: "drawing-tools", label: "Drawing Tools" },
+    { id: "crafting-materials", label: "Crafting Materials" },
+    { id: "sewing-supplies", label: "Sewing Supplies" },
+  ],
+  "Pet Products": [
+    { id: "pet-food", label: "Pet Food" },
+    { id: "pet-toys", label: "Pet Toys" },
+    { id: "pet-treats", label: "Pet Treats" },
+    { id: "pet-grooming", label: "Pet Grooming" },
+    { id: "pet-accessories", label: "Pet Accessories" },
+  ],
+  "Baby & Kids": [
+    { id: "kids-toys", label: "Kids Toys" },
+    { id: "kids-clothing", label: "Kids Clothing" },
+    { id: "strollers", label: "Strollers" },
+    { id: "car-seats", label: "Car Seats" },
+    { id: "nursery-furniture", label: "Nursery Furniture" },
+  ],
+  "Sports & Outdoors": [
+    { id: "sports-fitness", label: "Sports Fitness Equipment" },
+    { id: "outdoor-gear", label: "Outdoor Gear" },
+    { id: "team-sports", label: "Team Sports" },
+    { id: "individual-sports", label: "Individual Sports" },
+    { id: "athletic-wear", label: "Athletic Wear" },
+  ],
+  "Home & Kitchen": [
+    { id: "kitchen-appliances", label: "Kitchen Appliances" },
+    { id: "home-decor", label: "Home Decor" },
+    { id: "bed-bath", label: "Bed and Bath" },
+    { id: "furniture", label: "Furniture" },
+    { id: "outdoor-living", label: "Outdoor Living" },
+  ],
+};
+
+function CategoriesDropdown() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  function handleNavigate(categoryId) {
+    sessionStorage.removeItem("filters");
+    const currentFilter = {
+      category: [categoryId],
+    };
+
+    sessionStorage.setItem("filters", JSON.stringify(currentFilter));
+
+    if (location.pathname.includes("listing")) {
+      setSearchParams(new URLSearchParams(`?category=${categoryId}`));
+    } else {
+      navigate("/listing");
+    }
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="text-white hover:text-white hover:bg-blue-600"
+        >
+          <Grid3X3 className="w-4 h-4 mr-2" />
+          All Categories
+          <ChevronDown className="w-4 h-4 ml-2" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-80 max-h-96 overflow-y-auto">
+        {Object.entries(trustmartCategoryGroups).map(
+          ([groupName, categories]) => (
+            <div key={groupName}>
+              <DropdownMenuLabel className="text-blue-600 font-semibold text-sm">
+                {groupName}
+              </DropdownMenuLabel>
+              {categories.map((category) => (
+                <DropdownMenuItem
+                  key={category.id}
+                  onClick={() => handleNavigate(category.id)}
+                  className="cursor-pointer text-sm pl-4"
+                >
+                  {category.label}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+            </div>
+          )
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function MenuItems() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const mainMenuItems = [
+    { id: "home", label: "Home", path: "/" },
+    { id: "products", label: "Products", path: "/listing" },
+  ];
 
   function handleNavigate(getCurrentMenuItem) {
     sessionStorage.removeItem("filters");
@@ -53,25 +228,77 @@ function MenuItems() {
 
     sessionStorage.setItem("filters", JSON.stringify(currentFilter));
 
-    location.pathname.includes("listing") && currentFilter !== null
-      ? setSearchParams(
-          new URLSearchParams(`?category=${getCurrentMenuItem.id}`)
-        )
-      : navigate(getCurrentMenuItem.path);
+    if (location.pathname.includes("listing") && currentFilter !== null) {
+      setSearchParams(
+        new URLSearchParams(`?category=${getCurrentMenuItem.id}`)
+      );
+    } else {
+      navigate(getCurrentMenuItem.path);
+    }
   }
 
   return (
     <nav className="flex flex-col mb-3 lg:mb-0 lg:items-center gap-6 lg:flex-row">
-      {shoppingViewHeaderMenuItems.map((menuItem) => (
+      {mainMenuItems.map((menuItem) => (
         <Label
           onClick={() => handleNavigate(menuItem)}
-          className="text-sm font-medium cursor-pointer"
+          className="text-sm font-medium cursor-pointer hover:text-blue-200 transition-colors"
           key={menuItem.id}
         >
           {menuItem.label}
         </Label>
       ))}
+      <div className="hidden lg:block">
+        <CategoriesDropdown />
+      </div>
     </nav>
+  );
+}
+
+function MobileCategoriesMenu() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  function handleNavigate(categoryId) {
+    sessionStorage.removeItem("filters");
+    const currentFilter = {
+      category: [categoryId],
+    };
+
+    sessionStorage.setItem("filters", JSON.stringify(currentFilter));
+
+    if (location.pathname.includes("listing")) {
+      setSearchParams(new URLSearchParams(`?category=${categoryId}`));
+    } else {
+      navigate("/listing");
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <h3 className="font-semibold text-lg text-blue-600">Shop by Category</h3>
+      {Object.entries(trustmartCategoryGroups).map(
+        ([groupName, categories]) => (
+          <div key={groupName} className="space-y-2">
+            <h4 className="font-medium text-blue-600 text-sm border-b border-blue-100 pb-1">
+              {groupName}
+            </h4>
+            <div className="pl-2 space-y-1">
+              {categories.map((category) => (
+                <Label
+                  key={category.id}
+                  onClick={() => handleNavigate(category.id)}
+                  className="block text-sm cursor-pointer hover:text-blue-600 transition-colors py-1"
+                >
+                  {category.label}
+                </Label>
+              ))}
+            </div>
+          </div>
+        )
+      )}
+    </div>
   );
 }
 
@@ -93,7 +320,6 @@ function HeaderRightContent() {
   useEffect(() => {
     console.log("user", user);
     if (user) {
-      // Fetch cart items when user is logged in
       dispatch(fetchCartItems(user?.id));
     }
   }, [dispatch]);
@@ -105,12 +331,11 @@ function HeaderRightContent() {
       <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
         <Button
           onClick={() => setOpenCartSheet(true)}
-          // variant="outline"
           size="icon"
-          className="relative bg-[#0057B8]"
+          className="relative bg-white text-[#0057B8] hover:bg-blue-50 transition-colors"
         >
           <ShoppingCart className="w-6 h-6" />
-          <span className="absolute top-[-5px] right-[2px] font-bold text-sm">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
             {cartItems?.items?.length || 0}
           </span>
           <span className="sr-only">User cart</span>
@@ -128,31 +353,33 @@ function HeaderRightContent() {
       <DropdownMenu>
         {user === null ? (
           <Link to="/auth/login">
-            <div className="flex items-center gap-2 text-sm font-bold">
-              <User />
+            <div className="flex items-center gap-2 text-sm font-bold hover:text-blue-200 transition-colors">
+              <User className="w-4 h-4" />
               Sign In
             </div>
           </Link>
         ) : (
           <DropdownMenuTrigger asChild>
-            <Avatar className="bg-black">
-              <AvatarFallback className="bg-black text-white font-extrabold">
+            <Avatar className="bg-white text-[#0057B8] cursor-pointer hover:bg-blue-50 transition-colors">
+              <AvatarFallback className="bg-white text-[#0057B8] font-extrabold border-2 border-white">
                 {user?.userName[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
         )}
         <DropdownMenuContent side="right" className="w-56">
-          <DropdownMenuLabel>Logged in as {user?.userName}</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            Logged in as <span className="font-semibold">{user?.userName}</span>
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate("/account")}>
             <UserCog className="mr-2 h-4 w-4" />
-            Account
+            My Account
           </DropdownMenuItem>
           {user?.roles?.includes("vendor") ? (
             <DropdownMenuItem onClick={() => navigate("/vendor/dashboard")}>
               <Store className="mr-2 h-4 w-4" />
-              Vendor's Account
+              Vendor Dashboard
             </DropdownMenuItem>
           ) : (
             <DropdownMenuItem onClick={() => navigate("/auth/form")}>
@@ -176,38 +403,47 @@ function ShoppingHeader() {
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-[#0057B8] text-white">
+    <header className="sticky top-0 z-40 w-full border-b bg-[#0057B8] text-white shadow-lg">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={trustmartlogo} className="w-[50px]" alt="" srcset="" />
-          <span className="font-bold">Trustmart</span>
+        <Link
+          to="/"
+          className="flex items-center gap-2 hover:opacity-90 transition-opacity"
+        >
+          <img src={trustmartlogo} className="w-[50px]" alt="Trustmart Logo" />
+          <span className="font-bold text-xl">Trustmart</span>
         </Link>
+
         <div className="flex items-center gap-2 lg:hidden">
-          {/* Search icon */}
           <Button
             variant="outline"
             size="icon"
-            className="text-black"
-            onClick={() => {
-              // Handle search open – you can navigate or toggle modal
-              navigate("/search");
-            }}
+            className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors"
+            onClick={() => navigate("/search")}
           >
             <Search className="h-6 w-6" />
             <span className="sr-only">Search</span>
           </Button>
 
-          {/* Menu toggle */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="text-black">
+              <Button
+                variant="outline"
+                size="icon"
+                className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors"
+              >
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Toggle header menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-full max-w-xs">
-              <MenuItems />
-              <HeaderRightContent />
+            <SheetContent
+              side="left"
+              className="w-full max-w-sm overflow-y-auto"
+            >
+              <div className="space-y-6">
+                <MenuItems />
+                <MobileCategoriesMenu />
+                <HeaderRightContent />
+              </div>
             </SheetContent>
           </Sheet>
         </div>
