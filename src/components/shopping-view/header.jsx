@@ -8,6 +8,7 @@ import {
   UserCog,
   Search,
   ChevronDown,
+  ChevronRight,
   Grid3X3,
 } from "lucide-react";
 import {
@@ -255,10 +256,11 @@ function MenuItems() {
   );
 }
 
-function MobileCategoriesMenu() {
+function MobileCategoriesMenu({ onCategoryClick }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [expandedGroups, setExpandedGroups] = useState({});
 
   function handleNavigate(categoryId) {
     sessionStorage.removeItem("filters");
@@ -273,6 +275,18 @@ function MobileCategoriesMenu() {
     } else {
       navigate("/listing");
     }
+
+    // Close the mobile menu after navigation
+    if (onCategoryClick) {
+      onCategoryClick();
+    }
+  }
+
+  function toggleGroup(groupName) {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
   }
 
   return (
@@ -281,20 +295,31 @@ function MobileCategoriesMenu() {
       {Object.entries(trustmartCategoryGroups).map(
         ([groupName, categories]) => (
           <div key={groupName} className="space-y-2">
-            <h4 className="font-medium text-blue-600 text-sm border-b border-blue-100 pb-1">
-              {groupName}
-            </h4>
-            <div className="pl-2 space-y-1">
-              {categories.map((category) => (
-                <Label
-                  key={category.id}
-                  onClick={() => handleNavigate(category.id)}
-                  className="block text-sm cursor-pointer hover:text-blue-600 transition-colors py-1"
-                >
-                  {category.label}
-                </Label>
-              ))}
+            <div
+              className="flex items-center justify-between cursor-pointer py-2 border-b border-blue-100"
+              onClick={() => toggleGroup(groupName)}
+            >
+              <h4 className="font-medium text-blue-600 text-sm">{groupName}</h4>
+              {expandedGroups[groupName] ? (
+                <ChevronDown className="w-4 h-4 text-blue-600" />
+              ) : (
+                <ChevronRight className="w-4 h-4 text-blue-600" />
+              )}
             </div>
+
+            {expandedGroups[groupName] && (
+              <div className="pl-4 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                {categories.map((category) => (
+                  <Label
+                    key={category.id}
+                    onClick={() => handleNavigate(category.id)}
+                    className="block text-sm cursor-pointer hover:text-blue-600 transition-colors py-2 border-l-2 border-transparent hover:border-blue-300 pl-3"
+                  >
+                    {category.label}
+                  </Label>
+                ))}
+              </div>
+            )}
           </div>
         )
       )}
@@ -401,6 +426,11 @@ function HeaderRightContent() {
 function ShoppingHeader() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const handleCategoryClick = () => {
+    setIsSheetOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-[#0057B8] text-white shadow-lg">
@@ -424,7 +454,7 @@ function ShoppingHeader() {
             <span className="sr-only">Search</span>
           </Button>
 
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -441,7 +471,7 @@ function ShoppingHeader() {
             >
               <div className="space-y-6">
                 <MenuItems />
-                <MobileCategoriesMenu />
+                <MobileCategoriesMenu onCategoryClick={handleCategoryClick} />
                 <HeaderRightContent />
               </div>
             </SheetContent>
