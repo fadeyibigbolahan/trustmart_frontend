@@ -22,6 +22,7 @@ function AuthLogin() {
     event.preventDefault();
 
     dispatch(loginUser(formData)).then((data) => {
+      console.log("Login response", data);
       if (data?.payload?.success) {
         toast({
           title: data?.payload?.message,

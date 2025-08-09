@@ -6,6 +6,7 @@ const initialState = {
   isAuthenticated: false,
   isLoading: true,
   user: null,
+  error: null, // ← add this
 };
 
 export const registerUser = createAsyncThunk(
@@ -22,20 +23,28 @@ export const registerUser = createAsyncThunk(
 
 export const loginUser = createAsyncThunk(
   "/auth/login",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${url}auth/login`, formData, {
+        withCredentials: true,
+      });
 
-  async (formData) => {
-    const response = await axios.post(`${url}auth/login`, formData, {
-      withCredentials: true,
-    });
-    if (response.data.success) {
-      console.log("myTOken", response.data.token);
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-    } else {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      if (response.data.success) {
+        console.log("myTOken", response.data.token);
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+
+      return response.data;
+    } catch (error) {
+      // Send the server error message to .rejected
+      return rejectWithValue(
+        error.response?.data || { success: false, message: "Login failed" }
+      );
     }
-    return response.data;
   }
 );
 
@@ -121,6 +130,10 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+
+        console.error("Login error:", action.payload?.message);
+        // Optionally store the message in state to show in the UI
+        state.error = action.payload?.message || "Login failed";
       })
       .addCase(checkAuth.pending, (state) => {
         state.isLoading = true;

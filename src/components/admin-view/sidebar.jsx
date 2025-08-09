@@ -7,6 +7,7 @@ import {
 import { Fragment } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import trustmartlogo from "@/assets/trustmartlogo.png";
 
 const adminSidebarMenuItems = [
   {
@@ -60,8 +61,8 @@ function AdminSideBar({ open, setOpen }) {
         <SheetContent side="left" className="w-64">
           <div className="flex flex-col h-full">
             <SheetHeader className="border-b">
-              <SheetTitle className="flex gap-2 mt-5 mb-5">
-                <ChartNoAxesCombined size={30} />
+              <SheetTitle className="flex flex-col gap-2 mt-5 mb-5">
+                <img src={trustmartlogo} alt="Logo" className="h-8" />
                 <h1 className="text-2xl font-extrabold">Admin Panel</h1>
               </SheetTitle>
             </SheetHeader>
@@ -72,9 +73,9 @@ function AdminSideBar({ open, setOpen }) {
       <aside className="hidden w-64 flex-col border-r bg-background p-6 lg:flex">
         <div
           onClick={() => navigate("/admin/dashboard")}
-          className="flex cursor-pointer items-center gap-2"
+          className="flex flex-col cursor-pointer items-center gap-2"
         >
-          <ChartNoAxesCombined size={30} />
+          <img src={trustmartlogo} alt="Logo" className="h-8" />
           <h1 className="text-2xl font-extrabold">Admin Panel</h1>
         </div>
         <MenuItems />
