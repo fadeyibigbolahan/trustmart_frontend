@@ -13,6 +13,8 @@ import ShoppingLayout from "./components/shopping-view/layout";
 // Pages: Auth
 import AuthLogin from "./pages/auth/login";
 import AuthRegister from "./pages/auth/register";
+import AuthForgotPassword from "./pages/auth/forgetPassword";
+import ResetPassword from "./pages/auth/resetPassword";
 
 // Pages: Admin
 import AdminDashboard from "./pages/admin-view/dashboard";
@@ -101,6 +103,8 @@ function App() {
           <Route path="login" element={<AuthLogin />} />
           <Route path="register" element={<AuthRegister />} />
           <Route path="form" element={<VendorForm />} />
+          <Route path="forgot-password" element={<AuthForgotPassword />} />
+          <Route path="reset-password/:token" element={<ResetPassword />} />
         </Route>
 
         {/* 🛠 Admin Routes */}

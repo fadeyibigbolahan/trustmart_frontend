@@ -6,21 +6,21 @@ const initialState = {
   isAuthenticated: false,
   isLoading: true,
   user: null,
-  error: null, // ← add this
+  error: null,
 };
 
+// Register user
 export const registerUser = createAsyncThunk(
   "/auth/register",
-
   async (formData) => {
     const response = await axios.post(`${url}auth/register`, formData, {
       withCredentials: true,
     });
-
     return response.data;
   }
 );
 
+// Login user
 export const loginUser = createAsyncThunk(
   "/auth/login",
   async (formData, { rejectWithValue }) => {
@@ -30,7 +30,6 @@ export const loginUser = createAsyncThunk(
       });
 
       if (response.data.success) {
-        console.log("myTOken", response.data.token);
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("user", JSON.stringify(response.data.user));
       } else {
@@ -40,7 +39,6 @@ export const loginUser = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      // Send the server error message to .rejected
       return rejectWithValue(
         error.response?.data || { success: false, message: "Login failed" }
       );
@@ -48,6 +46,7 @@ export const loginUser = createAsyncThunk(
   }
 );
 
+// Logout user
 export const logoutUser = createAsyncThunk(
   "/auth/logout",
   async (_, { rejectWithValue }) => {
@@ -63,7 +62,6 @@ export const logoutUser = createAsyncThunk(
         }
       );
 
-      // Clear token & user on successful logout
       localStorage.removeItem("token");
       localStorage.removeItem("user");
 
@@ -76,22 +74,56 @@ export const logoutUser = createAsyncThunk(
   }
 );
 
-export const checkAuth = createAsyncThunk(
-  "/auth/checkauth",
+// Check auth
+export const checkAuth = createAsyncThunk("/auth/checkauth", async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    return { success: false };
+  }
+  const response = await axios.get(`${url}auth/check-auth`, {
+    headers: {
+      Authorization: token,
+    },
+  });
 
-  async () => {
-    const token = localStorage.getItem("token");
-    console.log("check auth token", token);
-    if (!token) {
-      return { success: false };
+  return response.data;
+});
+
+// Send reset password email
+export const sendPasswordResetEmail = createAsyncThunk(
+  "/auth/forgot-password",
+  async (formData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${url}auth/forgot-password`, formData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || {
+          success: false,
+          message: "Failed to send reset email",
+        }
+      );
     }
-    const response = await axios.get(`${url}auth/check-auth`, {
-      headers: {
-        Authorization: token,
-      },
-    });
+  }
+);
 
-    return response.data;
+// Reset password
+export const resetPassword = createAsyncThunk(
+  "/auth/reset-password",
+  async ({ token, password }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(`${url}auth/reset-password/${token}`, {
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || {
+          success: false,
+          message: "Failed to reset password",
+        }
+      );
+    }
   }
 );
 
@@ -106,12 +138,12 @@ const authSlice = createSlice({
       .addCase(registerUser.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(registerUser.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
@@ -120,8 +152,6 @@ const authSlice = createSlice({
         state.isLoading = true;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        console.log("user state", action);
-
         state.isLoading = false;
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
@@ -130,9 +160,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
-
-        console.error("Login error:", action.payload?.message);
-        // Optionally store the message in state to show in the UI
         state.error = action.payload?.message || "Login failed";
       })
       .addCase(checkAuth.pending, (state) => {
@@ -143,15 +170,36 @@ const authSlice = createSlice({
         state.user = action.payload.success ? action.payload.user : null;
         state.isAuthenticated = action.payload.success;
       })
-      .addCase(checkAuth.rejected, (state, action) => {
+      .addCase(checkAuth.rejected, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
       })
-      .addCase(logoutUser.fulfilled, (state, action) => {
+      .addCase(logoutUser.fulfilled, (state) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
+      })
+      .addCase(sendPasswordResetEmail.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(sendPasswordResetEmail.fulfilled, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(sendPasswordResetEmail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to send reset email";
+      })
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(resetPassword.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload?.message || "Failed to reset password";
       });
   },
 });

@@ -11,6 +11,18 @@ function CheckAuth({ isAuthenticated, user, loading, children }) {
   const isVendor = roles.includes("vendor");
   const isUser = roles.includes("user");
 
+  // Publicly accessible auth-related routes
+  const publicAuthPaths = [
+    "/auth/login",
+    "/auth/register",
+    "/auth/forgot-password",
+    "/auth/reset-password", // ✅ Added reset password route
+  ];
+
+  const isAuthPage = publicAuthPaths.some((path) =>
+    location.pathname.startsWith(path)
+  );
+
   // Handle root route
   if (location.pathname === "/") {
     if (!isAuthenticated) return <Navigate to="/auth/login" />;
@@ -20,14 +32,12 @@ function CheckAuth({ isAuthenticated, user, loading, children }) {
     return <Navigate to="/" />;
   }
 
-  const isAuthPage =
-    location.pathname.includes("/login") ||
-    location.pathname.includes("/register");
-
+  // Redirect to login if not authenticated and not on an auth page
   if (!isAuthenticated && !isAuthPage) {
     return <Navigate to="/auth/login" />;
   }
 
+  // Redirect authenticated users away from auth pages
   if (isAuthenticated && isAuthPage) {
     if (isAdmin) return <Navigate to="/admin/dashboard" />;
     // if (isVendor) return <Navigate to="/vendor/dashboard" />;
@@ -49,7 +59,7 @@ function CheckAuth({ isAuthenticated, user, loading, children }) {
     return <Navigate to="/unauth-page" />;
   }
 
-  // Block admin from vendor or shop routes (if needed)
+  // Block admin from vendor routes
   if (isAuthenticated && isAdmin && location.pathname.includes("/vendor")) {
     return <Navigate to="/admin/dashboard" />;
   }
