@@ -19,6 +19,8 @@ import {
 import { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useOutletContext } from "react-router-dom";
+import axios from "axios";
+import { url } from "@/store/api";
 
 const initialFormData = {
   imageFiles: [],
@@ -35,11 +37,9 @@ function VendorProducts() {
   const [openCreateProductsDialog, setOpenCreateProductsDialog] =
     useState(false);
   const [formData, setFormData] = useState(initialFormData);
-  // const [imageFiles, setImageFiles] = useState([]);
-  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
-  const [imageLoadingState, setImageLoadingState] = useState(false);
   const [currentEditedId, setCurrentEditedId] = useState(null);
-  const { vendor } = useOutletContext();
+  // const { vendor } = useOutletContext();
+  const [vendor, setVendor] = useState(null);
 
   const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
@@ -112,7 +112,33 @@ function VendorProducts() {
   }
 
   useEffect(() => {
-    dispatch(fetchVendorProducts(vendor._id));
+    console.log("useEffect called for vendor products");
+    const fetchVendor = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`${url}vendors/me`, {
+          headers: {
+            Authorization: token,
+          },
+        });
+        console.log("Vendor data fetched:", response.data.vendor);
+        setVendor(response.data.vendor);
+      } catch (error) {
+        console.error(
+          "Failed to fetch vendor profile:",
+          error.response?.data || error.message
+        );
+      }
+    };
+
+    fetchVendor();
+  }, []);
+
+  useEffect(() => {
+    if (vendor && vendor._id) {
+      // console.log("Fetching vendor products for ID:", vendor._id);
+      dispatch(fetchVendorProducts(vendor._id));
+    }
   }, [dispatch, vendor]);
 
   console.log(formData, "productList");

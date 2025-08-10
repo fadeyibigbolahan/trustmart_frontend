@@ -7,6 +7,7 @@ const initialState = {
   productList: [],
 };
 
+// Add new product
 export const addNewProduct = createAsyncThunk(
   "/products/addnewproduct",
   async (formData) => {
@@ -17,26 +18,31 @@ export const addNewProduct = createAsyncThunk(
         Authorization: token,
       },
     });
-
     return result?.data;
   }
 );
 
+// Fetch all products
 export const fetchAllProducts = createAsyncThunk(
   "/products/fetchAllProducts",
   async () => {
     const result = await axios.get(`${url}admin/products/get`);
-
-    return result?.data;
+    return result?.data.data; // returns just the array
   }
 );
 
+// Fetch vendor products
 export const fetchVendorProducts = createAsyncThunk(
   "products/fetchVendorProducts",
   async (vendorId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${url}admin/products/get/${vendorId}`);
-      return response.data;
+      console.log("Fetching vendor products for ID:", vendorId);
+      const response = await axios.get(
+        `${url}shop/products/vendor/${vendorId}`
+      );
+      // console.log("Vendor products fetched:", response.data);
+      // Ensure we only return an array
+      return response.data.products || response.data.data || [];
     } catch (error) {
       console.error("Failed to fetch vendor products:", error);
       return rejectWithValue(error.response?.data || "Something went wrong");
@@ -44,6 +50,7 @@ export const fetchVendorProducts = createAsyncThunk(
   }
 );
 
+// Edit product
 export const editProduct = createAsyncThunk(
   "/products/editProduct",
   async ({ id, formData }) => {
@@ -58,11 +65,11 @@ export const editProduct = createAsyncThunk(
         },
       }
     );
-
     return result?.data;
   }
 );
 
+// Delete product
 export const deleteProduct = createAsyncThunk(
   "/products/deleteProduct",
   async (id) => {
@@ -72,25 +79,39 @@ export const deleteProduct = createAsyncThunk(
         Authorization: token,
       },
     });
-
     return result?.data;
   }
 );
 
+// Slice
 const AdminProductsSlice = createSlice({
   name: "adminProducts",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch all products
       .addCase(fetchAllProducts.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(fetchAllProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.productList = action.payload.data;
+        state.productList = action.payload || [];
       })
-      .addCase(fetchAllProducts.rejected, (state, action) => {
+      .addCase(fetchAllProducts.rejected, (state) => {
+        state.isLoading = false;
+        state.productList = [];
+      })
+
+      // Fetch vendor products
+      .addCase(fetchVendorProducts.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchVendorProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.productList = action.payload || [];
+      })
+      .addCase(fetchVendorProducts.rejected, (state) => {
         state.isLoading = false;
         state.productList = [];
       });
