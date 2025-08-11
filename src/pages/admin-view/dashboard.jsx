@@ -50,7 +50,7 @@ const AdminDashboard = () => {
       const vendorAccount = vendor.vendorAccount || {};
 
       return {
-        id: vendor._id,
+        id: vendorAccount._id,
         name: vendor.userName,
         email: vendor.email,
         phone: vendor.phone || "N/A",
@@ -119,19 +119,42 @@ const AdminDashboard = () => {
   // Handle vendor status change
   const changeVendorStatus = async (vendorId, newStatus) => {
     try {
-      // You'll need to implement the API call to change vendor status
-      // Example API call:
-      // await axios.put(`${url}admin/vendors/${vendorId}/status`, { status: newStatus });
+      const token = localStorage.getItem("token");
 
-      // For now, update local state
-      setVendors(
-        vendors.map((vendor) =>
-          vendor.id === vendorId ? { ...vendor, status: newStatus } : vendor
+      const response = await axios.patch(
+        `${url}admin/users/vendors/${vendorId}/status`,
+        { status: newStatus },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      // Update local state after successful API call
+      setVendors((prevVendors) =>
+        prevVendors.map((vendor) =>
+          vendor._id === vendorId
+            ? {
+                ...vendor,
+                vendorAccount: {
+                  ...vendor.vendorAccount,
+                  isApproved: newStatus,
+                },
+              }
+            : vendor
         )
       );
+
+      console.log("Vendor status changed:", response.data.message);
     } catch (error) {
-      console.error("Error changing vendor status:", error);
-      setError("Failed to change vendor status");
+      console.error(
+        "Error changing vendor status:",
+        error.response?.data || error.message
+      );
+      setError(
+        error.response?.data?.message || "Failed to change vendor status"
+      );
     }
   };
 
@@ -544,7 +567,9 @@ const AdminDashboard = () => {
                               {vendor.status === "pending" ? (
                                 <>
                                   <button
-                                    onClick={() => approveVendor(vendor.id)}
+                                    onClick={() =>
+                                      changeVendorStatus(vendor.id, true)
+                                    }
                                     className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1"
                                     title="Approve Vendor"
                                   >
@@ -553,7 +578,7 @@ const AdminDashboard = () => {
                                   </button>
                                   <button
                                     onClick={() =>
-                                      changeVendorStatus(vendor.id, "rejected")
+                                      changeVendorStatus(vendor.id, false)
                                     }
                                     className="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-xs font-medium flex items-center gap-1"
                                     title="Reject Vendor"

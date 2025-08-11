@@ -10,15 +10,22 @@ const initialState = {
 // Add new product
 export const addNewProduct = createAsyncThunk(
   "/products/addnewproduct",
-  async (formData) => {
-    const token = localStorage.getItem("token");
-    const result = await axios.post(`${url}admin/products/add`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: token,
-      },
-    });
-    return result?.data;
+  async (formData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const result = await axios.post(`${url}admin/products/add`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: token,
+        },
+      });
+      return result?.data;
+    } catch (error) {
+      // Pass exact server error to component
+      return rejectWithValue(
+        error.response?.data || { message: error.message }
+      );
+    }
   }
 );
 

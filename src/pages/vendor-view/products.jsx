@@ -49,7 +49,6 @@ function VendorProducts() {
     event.preventDefault();
 
     const formPayload = new FormData();
-
     Object.entries(formData).forEach(([key, value]) => {
       if (key === "imageFiles") {
         if (Array.isArray(value)) {
@@ -63,26 +62,56 @@ function VendorProducts() {
     });
 
     if (currentEditedId !== null) {
-      // Optionally send FormData here too if edit requires image update
-      dispatch(
-        editProduct({ id: currentEditedId, formData: formPayload })
-      ).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchVendorProducts(vendor._id));
-          setFormData(initialFormData);
-          setOpenCreateProductsDialog(false);
-          setCurrentEditedId(null);
-        }
-      });
+      dispatch(editProduct({ id: currentEditedId, formData: formPayload }))
+        .then((data) => {
+          if (data?.payload?.success) {
+            dispatch(fetchVendorProducts(vendor._id));
+            setFormData(initialFormData);
+            setOpenCreateProductsDialog(false);
+            setCurrentEditedId(null);
+            toast({
+              title: "✅ Product updated successfully",
+              variant: "default",
+            });
+          } else {
+            toast({
+              title: "❌ Failed to update product",
+              description: data?.payload?.message || "Please try again.",
+              variant: "destructive",
+            });
+          }
+        })
+        .catch(() => {
+          toast({
+            title: "❌ Error updating product",
+            description: "Something went wrong.",
+            variant: "destructive",
+          });
+        });
     } else {
-      dispatch(addNewProduct(formPayload)).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchVendorProducts(vendor._id));
-          setOpenCreateProductsDialog(false);
-          setFormData(initialFormData);
-          toast({ title: "Product added successfully" });
-        }
-      });
+      dispatch(addNewProduct(formPayload))
+        .then((data) => {
+          if (data?.payload?.success) {
+            dispatch(fetchVendorProducts(vendor._id));
+            setOpenCreateProductsDialog(false);
+            setFormData(initialFormData);
+            toast({ title: "Product added successfully", variant: "default" });
+          } else {
+            console.log("Failed to add product:", data);
+            toast({
+              title: "Failed to add product",
+              description: data.payload?.message || "An unknown error occurred",
+              variant: "destructive",
+            });
+          }
+        })
+        .catch(() => {
+          toast({
+            title: "Error adding product",
+            description: "Something went wrong.",
+            variant: "destructive",
+          });
+        });
     }
   }
 
