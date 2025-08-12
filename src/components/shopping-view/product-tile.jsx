@@ -29,7 +29,7 @@ function ShoppingProductTile({
         color: "bg-orange-500",
       };
     if (product?.salePrice > 0)
-      return { text: `${discountPercentage}% OFF`, color: "bg-green-500" };
+      return { text: `${discountPercentage}% OFF`, color: "bg-blue-500" };
     return null;
   };
 

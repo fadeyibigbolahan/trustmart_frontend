@@ -95,8 +95,10 @@ export const sendPasswordResetEmail = createAsyncThunk(
   async (formData, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${url}auth/forgot-password`, formData);
+      console.log("Password reset response from server", response.data);
       return response.data;
     } catch (error) {
+      console.error("Error sending password reset email", error);
       return rejectWithValue(
         error.response?.data || {
           success: false,

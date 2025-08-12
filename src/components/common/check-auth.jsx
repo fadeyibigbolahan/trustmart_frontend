@@ -11,57 +11,49 @@ function CheckAuth({ isAuthenticated, user, loading, children }) {
   const isVendor = roles.includes("vendor");
   const isUser = roles.includes("user");
 
-  // Publicly accessible auth-related routes
-  const publicAuthPaths = [
-    "/auth/login",
-    "/auth/register",
-    "/auth/forgot-password",
-    "/auth/reset-password", // ✅ Added reset password route
-  ];
+  // Public auth pages (regex allows /auth/reset-password/:token)
+  const publicAuthRegex =
+    /^\/auth\/(login|register|forgot-password|reset-password(\/.*)?)$/;
 
-  const isAuthPage = publicAuthPaths.some((path) =>
-    location.pathname.startsWith(path)
-  );
+  const isAuthPage = publicAuthRegex.test(location.pathname);
 
-  // Handle root route
+  // Root redirect rules
   if (location.pathname === "/") {
-    if (!isAuthenticated) return <Navigate to="/auth/login" />;
+    if (!isAuthenticated) return <Navigate to="/auth/login" replace />;
 
-    if (isAdmin) return <Navigate to="/admin/dashboard" />;
-    // if (isVendor) return <Navigate to="/vendor/dashboard" />;
-    return <Navigate to="/" />;
+    if (isAdmin) return <Navigate to="/admin/dashboard" replace />;
+    // if (isVendor) return <Navigate to="/vendor/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // Redirect to login if not authenticated and not on an auth page
+  // Not authenticated + not a public auth page → go to login
   if (!isAuthenticated && !isAuthPage) {
-    return <Navigate to="/auth/login" />;
+    return <Navigate to="/auth/login" replace />;
   }
 
-  // Redirect authenticated users away from auth pages
+  // Authenticated but trying to access auth pages → redirect away
   if (isAuthenticated && isAuthPage) {
-    if (isAdmin) return <Navigate to="/admin/dashboard" />;
-    // if (isVendor) return <Navigate to="/vendor/dashboard" />;
-    return <Navigate to="/" />;
+    if (isAdmin) return <Navigate to="/admin/dashboard" replace />;
+    // if (isVendor) return <Navigate to="/vendor/dashboard" replace />;
+    return <Navigate to="/" replace />;
   }
 
-  // Block user from accessing admin/vendor routes
+  // User role restrictions
   if (isAuthenticated && isUser) {
     if (
       location.pathname.includes("/admin") ||
       location.pathname.includes("/vendor")
     ) {
-      return <Navigate to="/unauth-page" />;
+      return <Navigate to="/unauth-page" replace />;
     }
   }
 
-  // Block vendor from admin routes
   if (isAuthenticated && isVendor && location.pathname.includes("/admin")) {
-    return <Navigate to="/unauth-page" />;
+    return <Navigate to="/unauth-page" replace />;
   }
 
-  // Block admin from vendor routes
   if (isAuthenticated && isAdmin && location.pathname.includes("/vendor")) {
-    return <Navigate to="/admin/dashboard" />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
 
   return <>{children}</>;

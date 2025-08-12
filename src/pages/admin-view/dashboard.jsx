@@ -10,7 +10,11 @@ import {
   Calendar,
   MapPin,
   Star,
+  FileText,
+  ShoppingBag,
   AlertCircle,
+  Building,
+  CreditCard,
 } from "lucide-react";
 import { url } from "@/store/api";
 import axios from "axios";
@@ -21,6 +25,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("users");
+
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Transform API user data to match component structure
   const transformUserData = (apiUsers) => {
@@ -117,13 +124,48 @@ const AdminDashboard = () => {
   };
 
   // Handle vendor status change
-  const changeVendorStatus = async (vendorId, newStatus) => {
+  // const changeVendorStatus = async (vendorId, newStatus) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+
+  //     const response = await axios.patch(
+  //       `${url}admin/users/vendors/${vendorId}/status`,
+  //       { status: newStatus },
+  //       {
+  //         headers: {
+  //           Authorization: token,
+  //         },
+  //       }
+  //     );
+
+  //     setVendors(
+  //       vendors.map((vendor) => {
+  //         console.log("vendor state:", vendor);
+  //         return vendor.id === vendorId
+  //           ? { ...vendor, status: "active", isApproved: !vendor.isApproved }
+  //           : vendor;
+  //       })
+  //     );
+
+  //     console.log("Vendor status changed:", response.data.message);
+  //   } catch (error) {
+  //     console.error(
+  //       "Error changing vendor status:",
+  //       error.response?.data || error.message
+  //     );
+  //     setError(
+  //       error.response?.data?.message || "Failed to change vendor status"
+  //     );
+  //   }
+  // };
+
+  const changeVendorStatus = async (vendorId, newApprovalStatus) => {
     try {
       const token = localStorage.getItem("token");
 
       const response = await axios.patch(
         `${url}admin/users/vendors/${vendorId}/status`,
-        { status: newStatus },
+        { status: newApprovalStatus },
         {
           headers: {
             Authorization: token,
@@ -131,20 +173,37 @@ const AdminDashboard = () => {
         }
       );
 
-      // Update local state after successful API call
+      // Update local state immediately for better UX
       setVendors((prevVendors) =>
-        prevVendors.map((vendor) =>
-          vendor._id === vendorId
-            ? {
-                ...vendor,
-                vendorAccount: {
-                  ...vendor.vendorAccount,
-                  isApproved: newStatus,
-                },
-              }
-            : vendor
-        )
+        prevVendors.map((vendor) => {
+          if (vendor.id === vendorId) {
+            const newStatus = newApprovalStatus
+              ? "active"
+              : vendor.status === "active"
+              ? "suspended"
+              : "pending";
+            return {
+              ...vendor,
+              status: newStatus,
+              isApproved: newApprovalStatus,
+            };
+          }
+          return vendor;
+        })
       );
+
+      // If modal is open and showing this vendor, update the selected item too
+      if (selectedItem && selectedItem.id === vendorId) {
+        setSelectedItem((prev) => ({
+          ...prev,
+          status: newApprovalStatus
+            ? "active"
+            : prev.status === "active"
+            ? "suspended"
+            : "pending",
+          isApproved: newApprovalStatus,
+        }));
+      }
 
       console.log("Vendor status changed:", response.data.message);
     } catch (error) {
@@ -156,6 +215,17 @@ const AdminDashboard = () => {
         error.response?.data?.message || "Failed to change vendor status"
       );
     }
+  };
+
+  // Handle view details
+  const handleViewDetails = (item, type) => {
+    setSelectedItem({ ...item, type });
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
   };
 
   const formatCurrency = (amount) => {
@@ -435,7 +505,11 @@ const AdminDashboard = () => {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex gap-2">
-                              <button className="text-blue-600 hover:text-blue-800 p-1">
+                              <button
+                                onClick={() => handleViewDetails(user, "user")}
+                                className="text-blue-600 hover:text-blue-800 p-1"
+                                title="View Details"
+                              >
                                 <Eye className="w-4 h-4" />
                               </button>
                             </div>
@@ -559,6 +633,9 @@ const AdminDashboard = () => {
                           <td className="px-4 py-4">
                             <div className="flex gap-2">
                               <button
+                                onClick={() =>
+                                  handleViewDetails(vendor, "vendor")
+                                }
                                 className="text-blue-600 hover:text-blue-800 p-1"
                                 title="View Details"
                               >
@@ -590,7 +667,7 @@ const AdminDashboard = () => {
                               ) : vendor.status === "active" ? (
                                 <button
                                   onClick={() =>
-                                    changeVendorStatus(vendor.id, "suspended")
+                                    changeVendorStatus(vendor.id, false)
                                   }
                                   className="bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1 rounded-md text-xs font-medium"
                                   title="Suspend Vendor"
@@ -600,7 +677,7 @@ const AdminDashboard = () => {
                               ) : vendor.status === "suspended" ? (
                                 <button
                                   onClick={() =>
-                                    changeVendorStatus(vendor.id, "active")
+                                    changeVendorStatus(vendor.id, true)
                                   }
                                   className="bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded-md text-xs font-medium"
                                   title="Activate Vendor"
@@ -619,6 +696,209 @@ const AdminDashboard = () => {
             )}
           </div>
         </div>
+
+        {/* Details Modal */}
+        {isModalOpen && selectedItem && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    {selectedItem.type === "vendor" ? "Vendor" : "User"} Details
+                  </h2>
+                  <button
+                    onClick={closeModal}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6 space-y-6">
+                {/* Basic Info */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Basic Information
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Name
+                      </label>
+                      <p className="text-gray-900">{selectedItem.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Email
+                      </label>
+                      <p className="text-gray-900 flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        {selectedItem.email}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Phone
+                      </label>
+                      <p className="text-gray-900 flex items-center gap-2">
+                        <Phone className="w-4 h-4" />
+                        {selectedItem.phone}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Location
+                      </label>
+                      <p className="text-gray-900 flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        {selectedItem.location}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Join Date
+                      </label>
+                      <p className="text-gray-900 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {selectedItem.joinDate}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-500">
+                        Status
+                      </label>
+                      <div className="mt-1">
+                        {getStatusBadge(selectedItem.status)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* User specific info */}
+                {selectedItem.type === "user" && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Account Details
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">
+                          Wallet Balance
+                        </label>
+                        <p className="text-gray-900 flex items-center gap-2">
+                          <CreditCard className="w-4 h-4" />
+                          {formatCurrency(selectedItem.wallet)}
+                        </p>
+                      </div>
+                      {selectedItem.school && (
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">
+                            School
+                          </label>
+                          <p className="text-gray-900">{selectedItem.school}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Vendor specific info */}
+                {selectedItem.type === "vendor" && (
+                  <>
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        Business Information
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">
+                            Business Name
+                          </label>
+                          <p className="text-gray-900 flex items-center gap-2">
+                            <Building className="w-4 h-4" />
+                            {selectedItem.businessName}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">
+                            Business Type
+                          </label>
+                          <p className="text-gray-900">
+                            {selectedItem.businessType}
+                          </p>
+                        </div>
+                        {selectedItem.storeDescription && (
+                          <div className="md:col-span-2">
+                            <label className="text-sm font-medium text-gray-500">
+                              Store Description
+                            </label>
+                            <p className="text-gray-900">
+                              {selectedItem.storeDescription}
+                            </p>
+                          </div>
+                        )}
+                        {selectedItem.businessCertificate && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Business Certificate
+                            </label>
+                            <div className="mt-1 flex items-center gap-2">
+                              <img
+                                src={selectedItem.businessCertificate}
+                                alt="Business Certificate"
+                                className="max-w-xs max-h-48 object-contain rounded border"
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {selectedItem.subaccountCode && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Subaccount Code
+                            </label>
+                            <p className="text-gray-900 font-mono text-sm">
+                              {selectedItem.subaccountCode}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-4">
+                        Performance Metrics
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">
+                            Rating
+                          </label>
+                          <p className="text-gray-900 flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-400" />
+                            {selectedItem.rating > 0
+                              ? selectedItem.rating.toFixed(1)
+                              : "New vendor"}
+                          </p>
+                        </div>
+                        <div>
+                          <label className="text-sm font-medium text-gray-500">
+                            Total Sales
+                          </label>
+                          <p className="text-gray-900 flex items-center gap-2">
+                            <ShoppingBag className="w-4 h-4" />
+                            {selectedItem.totalSales || 0}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
