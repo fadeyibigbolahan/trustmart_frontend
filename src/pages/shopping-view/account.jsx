@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import accImg from "../../assets/pos.jpg";
+import accImg from "../../assets/ecomerce.jpg";
 import Address from "@/components/shopping-view/address";
 import ShoppingOrders from "@/components/shopping-view/orders";
 import Footer from "@/components/shopping-view/footer";
@@ -7,7 +7,7 @@ import Footer from "@/components/shopping-view/footer";
 function ShoppingAccount() {
   return (
     <div className="flex flex-col">
-      <div className="relative h-[300px] w-full overflow-hidden">
+      <div className="relative md:h-[300px] h-[200px] w-full overflow-hidden">
         <img
           src={accImg}
           className="h-full w-full object-cover object-center"
