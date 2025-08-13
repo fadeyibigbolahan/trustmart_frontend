@@ -8,53 +8,48 @@ import {
   Package,
   Mail,
   FileText,
+  Clock,
+  AlertTriangle,
 } from "lucide-react";
-import { url } from "@/store/api";
 import axios from "axios";
+import { url } from "@/store/api";
 
 export default function VendorDashboard() {
   const [storeData, setStoreData] = useState(null);
+  const [stats, setStats] = useState({
+    totalMoneyMade: 0,
+    totalSalesCount: 0,
+    totalProducts: 0,
+    totalOrders: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchVendor = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`${url}vendors/me`, {
-          headers: {
-            Authorization: token,
-          },
-        });
-        setStoreData(response.data.vendor);
+        // For your actual implementation, replace the above with:
+        const fetchVendorData = async () => {
+          const token = localStorage.getItem("token");
+          const response = await axios.get(`${url}vendors/me`, {
+            headers: {
+              Authorization: token,
+            },
+          });
+          const data = response.data;
+          console.log("Vendor Profile Data:", data);
+          setStoreData(data.vendor);
+          setStats(data.stats);
+          setLoading(false);
+        };
+        fetchVendorData();
       } catch (error) {
-        console.error(
-          "Failed to fetch vendor profile:",
-          error.response?.data || error.message
-        );
+        console.error("Failed to fetch vendor profile:", error.message);
+        setLoading(false);
       }
     };
 
     fetchVendor();
   }, []);
-
-  // const storeData = {
-  //   _id: "6841fcac94bbd8a5e05e27c0",
-  //   user: {
-  //     _id: "683723d651450f62a0c9c91b",
-  //     email: "kingwaretech@gmail.com",
-  //   },
-  //   storeName: "Kingware Store",
-  //   storeDescription: "Kingware Store Description",
-  //   isApproved: false,
-  //   balance: 0,
-  //   subaccountCode: "ACCT_7zenfk2kr6tnj8e",
-  //   logo: "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154981/trustmart/mieeq3d1ypiicddy5ws3.png",
-  //   businessCertificate:
-  //     "https://res.cloudinary.com/dafrqt0g9/image/upload/v1749154985/trustmart/leida7cinyfhoo3lnq6c.png",
-  //   products: [],
-  //   createdAt: "2025-06-05T20:23:08.302Z",
-  //   updatedAt: "2025-06-05T20:23:08.302Z",
-  //   __v: 0,
-  // };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -66,6 +61,78 @@ export default function VendorDashboard() {
     });
   };
 
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your store information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show awaiting approval message for unapproved vendors
+  if (storeData && !storeData.isApproved) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Clock className="w-10 h-10 text-blue-600" />
+            </div>
+
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              Store Under Review
+            </h1>
+
+            <div className="flex items-center justify-center bg-orange-50 text-orange-800 px-4 py-2 rounded-full mb-6">
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              <span className="text-sm font-medium">Pending Approval</span>
+            </div>
+
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Thank you for submitting your store application! Your store "
+              {storeData.storeName}" is currently under review by our team.
+            </p>
+
+            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+              <h3 className="font-semibold text-gray-800 mb-2">
+                What happens next?
+              </h3>
+              <ul className="text-sm text-gray-600 space-y-1 text-left">
+                <li>• Our team will review your store information</li>
+                <li>• We'll verify your business certificate</li>
+                {/* <li>• You'll receive an email once approved</li> */}
+                <li>• This process usually takes 1-3 business days</li>
+              </ul>
+            </div>
+
+            <div className="text-sm text-gray-500">
+              <p>
+                <strong>Submitted:</strong> {formatDate(storeData.createdAt)}
+              </p>
+              <p>
+                <strong>Contact:</strong> {storeData.user.email}
+              </p>
+            </div>
+
+            <div className="mt-8">
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 hover:bg-black text-white px-6 py-2 rounded-lg transition-colors duration-200"
+              >
+                Check Status
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show full dashboard for approved vendors
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto">
@@ -87,17 +154,10 @@ export default function VendorDashboard() {
             </div>
 
             <div className="flex items-center space-x-2">
-              {storeData?.isApproved ? (
-                <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full">
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-medium">Approved</span>
-                </div>
-              ) : (
-                <div className="flex items-center bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
-                  <XCircle className="w-4 h-4 mr-1" />
-                  <span className="text-sm font-medium">Pending Approval</span>
-                </div>
-              )}
+              <div className="flex items-center bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                <CheckCircle className="w-4 h-4 mr-1" />
+                <span className="text-sm font-medium">Approved</span>
+              </div>
             </div>
           </div>
 
@@ -168,12 +228,6 @@ export default function VendorDashboard() {
                   {storeData?.user.email || "N/A"}
                 </span>
               </div>
-              {/* <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                <span className="text-gray-600">User ID</span>
-                <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-                  {storeData?.user._id || "N/A"}
-                </span>
-              </div> */}
             </div>
           </div>
 
@@ -200,12 +254,42 @@ export default function VendorDashboard() {
                 </div>
               </div>
 
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Amount Made</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      ₦{stats?.totalMoneyMade?.toFixed(2) || "0.00"}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <p className="w-6 h-6 text-green-600 font-bold text-center">
+                      ₦
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-gray-600 text-sm">Total Products</p>
                     <p className="text-2xl font-bold text-indigo-600">
-                      {storeData?.products.length || 0}
+                      {stats?.totalProducts || 0}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <Package className="w-6 h-6 text-indigo-600" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Orders</p>
+                    <p className="text-2xl font-bold text-indigo-600">
+                      {stats?.totalOrders || 0}
                     </p>
                   </div>
                   <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">

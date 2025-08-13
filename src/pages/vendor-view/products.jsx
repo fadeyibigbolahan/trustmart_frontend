@@ -40,6 +40,7 @@ function VendorProducts() {
   const [currentEditedId, setCurrentEditedId] = useState(null);
   // const { vendor } = useOutletContext();
   const [vendor, setVendor] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { productList } = useSelector((state) => state.adminProducts);
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ function VendorProducts() {
 
   function onSubmit(event) {
     event.preventDefault();
+    setIsSubmitting(true); // start loading
 
     const formPayload = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
@@ -64,6 +66,7 @@ function VendorProducts() {
     if (currentEditedId !== null) {
       dispatch(editProduct({ id: currentEditedId, formData: formPayload }))
         .then((data) => {
+          setIsSubmitting(false); // stop loading
           if (data?.payload?.success) {
             dispatch(fetchVendorProducts(vendor._id));
             setFormData(initialFormData);
@@ -82,6 +85,7 @@ function VendorProducts() {
           }
         })
         .catch(() => {
+          setIsSubmitting(false);
           toast({
             title: "❌ Error updating product",
             description: "Something went wrong.",
@@ -91,6 +95,7 @@ function VendorProducts() {
     } else {
       dispatch(addNewProduct(formPayload))
         .then((data) => {
+          setIsSubmitting(false); // stop loading
           if (data?.payload?.success) {
             dispatch(fetchVendorProducts(vendor._id));
             setOpenCreateProductsDialog(false);
@@ -106,6 +111,7 @@ function VendorProducts() {
           }
         })
         .catch(() => {
+          setIsSubmitting(false);
           toast({
             title: "Error adding product",
             description: "Something went wrong.",
@@ -211,9 +217,15 @@ function VendorProducts() {
               onSubmit={onSubmit}
               formData={formData}
               setFormData={setFormData}
-              buttonText={currentEditedId !== null ? "Edit" : "Add"}
+              buttonText={
+                isSubmitting
+                  ? "Saving..."
+                  : currentEditedId !== null
+                  ? "Edit"
+                  : "Add"
+              }
               formControls={addProductFormElements}
-              isBtnDisabled={!isFormValid()}
+              isBtnDisabled={isSubmitting || !isFormValid()}
             />
           </div>
         </SheetContent>
