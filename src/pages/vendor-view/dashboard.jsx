@@ -140,7 +140,7 @@ export default function VendorDashboard() {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="flex flex-col md:flex-row gap-2 items-center justify-between mb-6">
             <div className="flex flex-col md:flex-row items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
                 <Store className="w-8 h-8 text-white" />
               </div>
               <div>
