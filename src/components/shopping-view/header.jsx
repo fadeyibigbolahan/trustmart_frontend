@@ -206,7 +206,7 @@ function CategoriesDropdown() {
   );
 }
 
-function MenuItems() {
+function MenuItems({ onItemClick }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -235,6 +235,11 @@ function MenuItems() {
       );
     } else {
       navigate(getCurrentMenuItem.path);
+    }
+
+    // Close mobile sheet when menu item is clicked
+    if (onItemClick) {
+      onItemClick();
     }
   }
 
@@ -327,10 +332,11 @@ function MobileCategoriesMenu({ onCategoryClick }) {
   );
 }
 
-function HeaderRightContent() {
+function HeaderRightContent({ onItemClick }) {
   const { user } = useSelector((state) => state.auth);
   const { cartItems } = useSelector((state) => state.shopCart);
   const [openCartSheet, setOpenCartSheet] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -340,6 +346,36 @@ function HeaderRightContent() {
 
   function handleLogout() {
     dispatch(logoutUser());
+    // Close mobile sheet when logging out
+    if (onItemClick) {
+      onItemClick();
+    }
+  }
+
+  function handleNavigation(path) {
+    navigate(path);
+    // Close mobile sheet when navigating
+    if (onItemClick) {
+      onItemClick();
+    }
+  }
+
+  function handleCartClick() {
+    setOpenCartSheet(true);
+    // Don't close mobile sheet when opening cart - let both modals coexist
+    // The cart modal will be on top and user can close it independently
+  }
+
+  function handleSignInClick() {
+    // Close mobile sheet when clicking sign in
+    if (onItemClick) {
+      onItemClick();
+    }
+  }
+
+  // Handle cart sheet close independently
+  function handleCartSheetClose() {
+    setOpenCartSheet(false);
   }
 
   useEffect(() => {
@@ -353,31 +389,113 @@ function HeaderRightContent() {
 
   return (
     <div className="flex lg:items-center lg:flex-row flex-col gap-4">
-      <Sheet open={openCartSheet} onOpenChange={() => setOpenCartSheet(false)}>
-        <Button
-          onClick={() => setOpenCartSheet(true)}
-          size="icon"
-          className="relative bg-white text-[#0057B8] hover:bg-blue-50 transition-colors"
-        >
-          <ShoppingCart className="w-6 h-6" />
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
-            {cartItems?.items?.length || 0}
-          </span>
-          <span className="sr-only">User cart</span>
-        </Button>
-        <UserCartWrapper
-          setOpenCartSheet={setOpenCartSheet}
-          cartItems={
-            cartItems && cartItems.items && cartItems.items.length > 0
-              ? cartItems.items
-              : []
-          }
-        />
-      </Sheet>
+      {/* Desktop version - modal cart */}
+      <div className="hidden lg:block">
+        <Sheet open={openCartSheet} onOpenChange={handleCartSheetClose}>
+          <Button
+            onClick={handleCartClick}
+            size="icon"
+            className="relative bg-white text-[#0057B8] hover:bg-blue-50 transition-colors"
+          >
+            <ShoppingCart className="w-6 h-6" />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
+              {cartItems?.items?.length || 0}
+            </span>
+            <span className="sr-only">User cart</span>
+          </Button>
+          <UserCartWrapper
+            setOpenCartSheet={handleCartSheetClose}
+            onCheckout={() => {
+              // Close both cart modal and mobile menu when checkout is clicked
+              handleCartSheetClose();
+              if (onItemClick) {
+                onItemClick();
+              }
+            }}
+            cartItems={
+              cartItems && cartItems.items && cartItems.items.length > 0
+                ? cartItems.items
+                : []
+            }
+          />
+        </Sheet>
+      </div>
 
-      <DropdownMenu>
+      {/* Mobile version - direct cart display */}
+      <div className="lg:hidden">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg text-blue-600">Your Cart</h3>
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-600">
+                {cartItems?.items?.length || 0} items
+              </span>
+            </div>
+          </div>
+
+          <div className="max-h-64 overflow-y-auto space-y-3">
+            {cartItems && cartItems.items && cartItems.items.length > 0 ? (
+              cartItems.items.map((item) => (
+                <div
+                  key={item.productId}
+                  className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg"
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-medium text-gray-900 truncate">
+                      {item.title}
+                    </h4>
+                    <p className="text-sm text-gray-600">
+                      Qty: {item.quantity} × ${item.price}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500 text-center py-4">
+                Your cart is empty
+              </p>
+            )}
+          </div>
+
+          {cartItems && cartItems.items && cartItems.items.length > 0 && (
+            <div className="pt-3 border-t border-blue-100">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-medium text-gray-900">Total:</span>
+                <span className="font-bold text-lg text-blue-600">
+                  $
+                  {cartItems.items
+                    .reduce(
+                      (total, item) => total + item.price * item.quantity,
+                      0
+                    )
+                    .toFixed(2)}
+                </span>
+              </div>
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  navigate("/checkout");
+                  if (onItemClick) {
+                    onItemClick();
+                  }
+                }}
+              >
+                Proceed to Checkout
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
         {user === null ? (
-          <Link to="/auth/login">
+          <Link to="/auth/login" onClick={handleSignInClick}>
             <div className="flex items-center gap-2 text-sm font-bold hover:text-blue-200 transition-colors">
               <User className="w-4 h-4" />
               Sign In
@@ -397,17 +515,19 @@ function HeaderRightContent() {
             Logged in as <span className="font-semibold">{user?.userName}</span>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate("/account")}>
+          <DropdownMenuItem onClick={() => handleNavigation("/account")}>
             <UserCog className="mr-2 h-4 w-4" />
             My Account
           </DropdownMenuItem>
           {user?.roles?.includes("vendor") ? (
-            <DropdownMenuItem onClick={() => navigate("/vendor/dashboard")}>
+            <DropdownMenuItem
+              onClick={() => handleNavigation("/vendor/dashboard")}
+            >
               <Store className="mr-2 h-4 w-4" />
               Vendor Dashboard
             </DropdownMenuItem>
           ) : (
-            <DropdownMenuItem onClick={() => navigate("/auth/form")}>
+            <DropdownMenuItem onClick={() => handleNavigation("/auth/form")}>
               <Store className="mr-2 h-4 w-4" />
               Become a Vendor
             </DropdownMenuItem>
@@ -425,11 +545,21 @@ function HeaderRightContent() {
 
 function ShoppingHeader() {
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { cartItems } = useSelector((state) => state.shopCart);
   const navigate = useNavigate();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const handleCategoryClick = () => {
+  const handleItemClick = () => {
     setIsSheetOpen(false);
+  };
+
+  const handleSearchClick = () => {
+    navigate("/search");
+    setIsSheetOpen(false);
+  };
+
+  const handleCartClick = () => {
+    navigate("/cart");
   };
 
   return (
@@ -439,18 +569,22 @@ function ShoppingHeader() {
           to="/"
           className="flex items-center gap-2 hover:opacity-90 transition-opacity"
         >
-          <img src={trustmartlogo} className="w-[50px]" alt="Trustmart Logo" />
-          <span className="font-bold text-xl">Trustmart</span>
+          <img
+            src={trustmartlogo}
+            className="w-8 lg:w-[50px]"
+            alt="Trustmart Logo"
+          />
+          <span className="font-bold text-lg lg:text-xl">Trustmart</span>
         </Link>
 
         <div className="flex items-center gap-2 lg:hidden">
           <Button
             variant="outline"
             size="icon"
-            className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors"
-            onClick={() => navigate("/search")}
+            className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors h-8 w-8"
+            onClick={handleSearchClick}
           >
-            <Search className="h-6 w-6" />
+            <Search className="h-4 w-4" />
             <span className="sr-only">Search</span>
           </Button>
 
@@ -459,9 +593,9 @@ function ShoppingHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors"
+                className="text-[#0057B8] bg-white hover:bg-blue-50 transition-colors h-8 w-8"
               >
-                <Menu className="h-6 w-6" />
+                <Menu className="h-4 w-4" />
                 <span className="sr-only">Toggle header menu</span>
               </Button>
             </SheetTrigger>
@@ -470,9 +604,9 @@ function ShoppingHeader() {
               className="w-full max-w-sm overflow-y-auto"
             >
               <div className="space-y-6">
-                <MenuItems />
-                <MobileCategoriesMenu onCategoryClick={handleCategoryClick} />
-                <HeaderRightContent />
+                <MenuItems onItemClick={handleItemClick} />
+                <MobileCategoriesMenu onCategoryClick={handleItemClick} />
+                <HeaderRightContent onItemClick={handleItemClick} />
               </div>
             </SheetContent>
           </Sheet>
