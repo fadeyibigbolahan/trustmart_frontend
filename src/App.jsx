@@ -43,6 +43,7 @@ import VendorDashboard from "./pages/vendor-view/dashboard";
 import VendorProducts from "./pages/vendor-view/products";
 import VendorOrders from "./pages/vendor-view/orders";
 import VendorFeatures from "./pages/vendor-view/features";
+import VendorWithdrawal from "./pages/vendor-view/withdrawal";
 import VendorForm from "./pages/vendor-view/vendorform";
 import OrderSuccess from "./pages/shopping-view/order-success";
 
@@ -135,6 +136,7 @@ function App() {
           <Route path="products" element={<VendorProducts />} />
           <Route path="orders" element={<VendorOrders />} />
           <Route path="features" element={<VendorFeatures />} />
+          <Route path="withdrawal" element={<VendorWithdrawal />} />
         </Route>
 
         {/* 🚫 Unauthorized / Fallback */}
