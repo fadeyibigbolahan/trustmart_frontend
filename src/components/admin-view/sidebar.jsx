@@ -1,4 +1,5 @@
 import {
+  ArrowBigDown,
   BadgeCheck,
   ChartNoAxesCombined,
   LayoutDashboard,
@@ -27,6 +28,12 @@ const adminSidebarMenuItems = [
     label: "Orders",
     path: "/admin/orders",
     icon: <BadgeCheck />,
+  },
+  {
+    id: "withdrawal-management",
+    label: "Withdrawal",
+    path: "/admin/withdrawal-management",
+    icon: <ArrowBigDown />,
   },
 ];
 

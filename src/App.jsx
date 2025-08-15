@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin-view/dashboard";
 import AdminProducts from "./pages/admin-view/products";
 import AdminOrders from "./pages/admin-view/orders";
 import AdminFeatures from "./pages/admin-view/features";
+import AdminWithdrawalManagement from "./pages/admin-view/withdrawal-management";
 
 // Pages: Vendor
 // import VendorDashboard from "./pages/vendor-view/dashboard";
@@ -121,6 +122,10 @@ function App() {
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />
           <Route path="features" element={<AdminFeatures />} />
+          <Route
+            path="withdrawal-management"
+            element={<AdminWithdrawalManagement />}
+          />
         </Route>
 
         {/* 🛠 Vendor Routes */}
