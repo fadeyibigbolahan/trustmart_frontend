@@ -22,7 +22,11 @@ function ShoppingCheckout() {
 
   console.log(currentSelectedAddress, "cartItems");
 
-  const totalCartAmount =
+  // Add this constant near the top of your component, after the useState declarations
+  const TRANSPORT_FEE = 200;
+
+  // Update the totalCartAmount calculation to include transport fee
+  const subtotalAmount =
     cartItems && cartItems.items && cartItems.items.length > 0
       ? cartItems.items.reduce(
           (sum, currentItem) =>
@@ -34,6 +38,8 @@ function ShoppingCheckout() {
           0
         )
       : 0;
+
+  const totalCartAmount = subtotalAmount + TRANSPORT_FEE;
 
   // function handleInitiatePaypalPayment() {
   //   if (cartItems.length === 0) {
@@ -198,6 +204,15 @@ function ShoppingCheckout() {
               ))
             : null}
           <div className="mt-8 space-y-4">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₦{subtotalAmount}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Transport Fee</span>
+              <span>₦{TRANSPORT_FEE}</span>
+            </div>
+            <hr className="my-2" />
             <div className="flex justify-between">
               <span className="font-bold">Total</span>
               <span className="font-bold">₦{totalCartAmount}</span>
