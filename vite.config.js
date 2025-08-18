@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/trustmart_frontend/", // repo name with slashes
+  base: "/", // repo name with slashes
   plugins: [react()],
   resolve: {
     alias: {
