@@ -563,7 +563,7 @@ function ShoppingHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-[#0057B8] text-white shadow-lg">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b bg-[#0057B8] text-white shadow-lg">
       <div className="flex h-16 items-center justify-between px-4 md:px-6">
         <Link
           to="/"

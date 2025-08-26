@@ -36,7 +36,7 @@ const OrderSuccessPage = () => {
   if (!order) return <p>Could not verify your payment.</p>;
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-6 max-w-2xl mx-auto mt-16">
       <h1 className="text-2xl font-bold text-green-600 mb-4">
         Order Successful!
       </h1>

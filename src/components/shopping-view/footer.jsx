@@ -12,6 +12,7 @@ import {
   Truck,
 } from "lucide-react";
 import trustmartlogo from "../../assets/trustmartlogo.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -180,12 +181,12 @@ const Footer = () => {
               © 2025 TrustMart. All rights reserved.
             </div>
             <div className="flex flex-wrap gap-6 text-sm">
-              <a
-                href="#"
+              <Link
+                to="/policy"
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 Privacy Policy
-              </a>
+              </Link>
               <a
                 href="#"
                 className="text-gray-400 hover:text-white transition-colors"

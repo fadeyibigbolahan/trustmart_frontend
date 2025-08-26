@@ -34,6 +34,7 @@ import ShoppingAccount from "./pages/shopping-view/account";
 import PaypalReturnPage from "./pages/shopping-view/paypal-return";
 import PaymentSuccessPage from "./pages/shopping-view/payment-success";
 import SearchProducts from "./pages/shopping-view/search";
+import Policy from "./pages/shopping-view/policy";
 
 // Misc
 import NotFound from "./pages/not-found";
@@ -72,6 +73,7 @@ function App() {
           <Route path="search" element={<SearchProducts />} />
           <Route path="paypal-return" element={<PaypalReturnPage />} />
           <Route path="payment-success" element={<PaymentSuccessPage />} />
+          <Route path="policy" element={<Policy />} />
           <Route path="/order/success" element={<OrderSuccess />} />
 
           {/* 🔒 Protected Shopping Routes */}

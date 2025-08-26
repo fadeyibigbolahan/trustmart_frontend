@@ -98,7 +98,7 @@ function ShoppingHome() {
   }, [dispatch]);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen mt-16">
       <div className="relative w-full lg:h-[600px] md:h-[300px] h-[180px] overflow-hidden">
         {fImageList.map((slide, index) => (
           <img

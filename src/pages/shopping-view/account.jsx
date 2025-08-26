@@ -6,7 +6,7 @@ import Footer from "@/components/shopping-view/footer";
 
 function ShoppingAccount() {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col mt-16">
       <div className="relative md:h-[300px] h-[200px] w-full overflow-hidden">
         <img
           src={accImg}
