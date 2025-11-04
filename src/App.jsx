@@ -59,10 +59,6 @@ function App() {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  // if (isLoading) {
-  //   return <Skeleton className="w-[800px] bg-black h-[600px]" />;
-  // }
-
   return (
     <div className="flex flex-col overflow-hidden bg-white">
       <Routes>

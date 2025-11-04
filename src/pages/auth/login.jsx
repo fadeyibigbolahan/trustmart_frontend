@@ -15,25 +15,37 @@ const initialState = {
 function AuthLogin() {
   const [formData, setFormData] = useState(initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const dispatch = useDispatch();
   const { toast } = useToast();
 
   function onSubmit(event) {
     event.preventDefault();
 
-    dispatch(loginUser(formData)).then((data) => {
-      console.log("Login response", data);
-      if (data?.payload?.success) {
-        toast({
-          title: data?.payload?.message,
-        });
-      } else {
-        toast({
-          title: data?.payload?.message,
-          variant: "destructive",
-        });
-      }
-    });
+    // Prevent multiple submissions if already loading
+    if (isLoading) {
+      return;
+    }
+
+    setIsLoading(true); // Set loading to true when submission starts
+
+    dispatch(loginUser(formData))
+      .then((data) => {
+        console.log("Login response", data);
+        if (data?.payload?.success) {
+          toast({
+            title: data?.payload?.message,
+          });
+        } else {
+          toast({
+            title: data?.payload?.message,
+            variant: "destructive",
+          });
+        }
+      })
+      .finally(() => {
+        setIsLoading(false); // Reset loading state when request completes
+      });
   }
 
   // Modify form controls to include password toggle
@@ -78,10 +90,11 @@ function AuthLogin() {
       </div>
       <CommonForm
         formControls={modifiedFormControls}
-        buttonText={"Sign In"}
+        buttonText={isLoading ? "Signing In..." : "Sign In"} // Update button text based on loading state
         formData={formData}
         setFormData={setFormData}
         onSubmit={onSubmit}
+        isLoading={isLoading} // Pass loading state to CommonForm
       />
 
       {/* Forgot password link */}

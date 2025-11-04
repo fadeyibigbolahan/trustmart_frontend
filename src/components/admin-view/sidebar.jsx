@@ -49,7 +49,7 @@ function MenuItems({ setOpen }) {
             navigate(menuItem.path);
             setOpen ? setOpen(false) : null;
           }}
-          className="flex cursor-pointer text-xl items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="flex cursor-pointer text-lg items-center gap-2 rounded-md px-3 py-2 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           {menuItem.icon}
           <span>{menuItem.label}</span>
@@ -69,7 +69,7 @@ function AdminSideBar({ open, setOpen }) {
           <div className="flex flex-col h-full">
             <SheetHeader className="border-b">
               <SheetTitle className="flex flex-col gap-2 mt-5 mb-5">
-                <img src={trustmartlogo} alt="Logo" className="h-8" />
+                <img src={trustmartlogo} alt="Logo" className="h-16 w-16" />
                 <h1 className="text-2xl font-extrabold">Admin Panel</h1>
               </SheetTitle>
             </SheetHeader>

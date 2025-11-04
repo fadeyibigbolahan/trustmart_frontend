@@ -43,6 +43,9 @@ function AdminProducts() {
   const dispatch = useDispatch();
   const { toast } = useToast();
 
+  useEffect(() => {
+    console.log("prod", productList);
+  }, [productList]);
   function onSubmit(event) {
     event.preventDefault();
 
