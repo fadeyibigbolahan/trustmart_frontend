@@ -15,6 +15,9 @@ import {
   AlertCircle,
   Building,
   CreditCard,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from "lucide-react";
 import { url } from "@/store/api";
 import axios from "axios";
@@ -35,15 +38,14 @@ const AdminDashboard = () => {
       id: user._id,
       name: user.userName,
       email: user.email,
-      phone: user.phone || "N/A", // Phone might not be in API
+      phone: user.phone || "N/A",
       joinDate: user.createdAt
         ? new Date(user.createdAt).toISOString().split("T")[0]
         : "N/A",
-      status: "active", // You might want to add status logic based on your API
+      status: "active",
       type: "user",
-      vendorRequest:
-        user.roles.includes("vendor") && user.roles.includes("user"), // Has both roles means approved vendor
-      location: user.location || "N/A", // Location might not be in API
+      vendorRequest: user.roles?.includes("vendor"),
+      location: user.location || "N/A",
       businessName: user.businessName || "N/A",
       businessType: user.businessType || "N/A",
       wallet: user.wallet || 0,
@@ -58,107 +60,38 @@ const AdminDashboard = () => {
 
       return {
         id: vendorAccount._id,
+        userId: vendor._id, // Keep user ID for reference
         name: vendor.userName,
         email: vendor.email,
         phone: vendor.phone || "N/A",
-        businessName: vendorAccount.storeName || vendor.userName, // Use storeName from vendorAccount
+        businessName: vendorAccount.storeName || vendor.userName,
         businessType: vendor.businessType || "General",
         joinDate: vendorAccount.createdAt
           ? new Date(vendorAccount.createdAt).toISOString().split("T")[0]
           : vendor.createdAt
           ? new Date(vendor.createdAt).toISOString().split("T")[0]
           : "N/A",
-        status: vendorAccount.isApproved === false ? "pending" : "active", // Use isApproved to determine status
+        status: vendorAccount.isApproved === false ? "pending" : "active",
         rating: vendor.rating || 0,
         totalSales: vendor.totalSales || 0,
-        products: vendorAccount.products ? vendorAccount.products.length : 0, // Count products from vendorAccount
+        products: vendorAccount.products ? vendorAccount.products.length : 0,
         location: vendor.location || "N/A",
         wallet: vendor.wallet || 0,
-        vendorBalance: vendorAccount.balance || 0, // Vendor-specific balance
+        vendorBalance: vendorAccount.balance || 0,
         storeDescription: vendorAccount.storeDescription || "",
         logo: vendorAccount.logo || null,
         businessCertificate: vendorAccount.businessCertificate || null,
         subaccountCode: vendorAccount.subaccountCode || null,
         isApproved: vendorAccount.isApproved || false,
+        // Payment status fields
+        isEntryFeePaid: vendorAccount.isEntryFeePaid || false,
+        paymentDate: vendorAccount.paymentDate || null,
+        paymentReference: vendorAccount.paymentReference || null,
       };
     });
   };
 
-  // Handle vendor approval (approve pending vendor account)
-  const approveVendor = async (vendorId) => {
-    try {
-      // API call to approve vendor account
-      // await axios.put(`${url}admin/vendors/${vendorId}/approve`);
-
-      // Update local state
-      setVendors(
-        vendors.map((vendor) =>
-          vendor.id === vendorId
-            ? { ...vendor, status: "active", isApproved: true }
-            : vendor
-        )
-      );
-    } catch (error) {
-      console.error("Error approving vendor:", error);
-      setError("Failed to approve vendor");
-    }
-  };
-
-  // Handle vendor request rejection
-  const rejectVendorRequest = async (userId) => {
-    try {
-      // You'll need to implement the API call to reject vendor request
-      // Example API call:
-      // await axios.put(`${url}admin/users/${userId}/reject-vendor-request`);
-
-      // For now, update local state
-      setUsers(
-        users.map((user) =>
-          user.id === userId ? { ...user, vendorRequest: false } : user
-        )
-      );
-    } catch (error) {
-      console.error("Error rejecting vendor request:", error);
-      setError("Failed to reject vendor request");
-    }
-  };
-
-  // Handle vendor status change
-  // const changeVendorStatus = async (vendorId, newStatus) => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     const response = await axios.patch(
-  //       `${url}admin/users/vendors/${vendorId}/status`,
-  //       { status: newStatus },
-  //       {
-  //         headers: {
-  //           Authorization: token,
-  //         },
-  //       }
-  //     );
-
-  //     setVendors(
-  //       vendors.map((vendor) => {
-  //         console.log("vendor state:", vendor);
-  //         return vendor.id === vendorId
-  //           ? { ...vendor, status: "active", isApproved: !vendor.isApproved }
-  //           : vendor;
-  //       })
-  //     );
-
-  //     console.log("Vendor status changed:", response.data.message);
-  //   } catch (error) {
-  //     console.error(
-  //       "Error changing vendor status:",
-  //       error.response?.data || error.message
-  //     );
-  //     setError(
-  //       error.response?.data?.message || "Failed to change vendor status"
-  //     );
-  //   }
-  // };
-
+  // Handle vendor approval
   const changeVendorStatus = async (vendorId, newApprovalStatus) => {
     try {
       const token = localStorage.getItem("token");
@@ -173,7 +106,6 @@ const AdminDashboard = () => {
         }
       );
 
-      // Update local state immediately for better UX
       setVendors((prevVendors) =>
         prevVendors.map((vendor) => {
           if (vendor.id === vendorId) {
@@ -192,7 +124,6 @@ const AdminDashboard = () => {
         })
       );
 
-      // If modal is open and showing this vendor, update the selected item too
       if (selectedItem && selectedItem.id === vendorId) {
         setSelectedItem((prev) => ({
           ...prev,
@@ -235,6 +166,15 @@ const AdminDashboard = () => {
     }).format(amount);
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   const getStatusBadge = (status) => {
     const statusClasses = {
       active: "bg-green-100 text-green-800 border-green-200",
@@ -252,6 +192,44 @@ const AdminDashboard = () => {
     );
   };
 
+  const getPaymentStatusBadge = (isEntryFeePaid) => {
+    if (isEntryFeePaid) {
+      return (
+        <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium border border-green-200">
+          <CheckCircle className="w-3 h-3" />
+          Paid
+        </span>
+      );
+    } else {
+      return (
+        <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium border border-red-200">
+          <XCircle className="w-3 h-3" />
+          Unpaid
+        </span>
+      );
+    }
+  };
+
+  const getVendorStatusBadge = (vendor) => {
+    if (!vendor.isEntryFeePaid) {
+      return (
+        <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium border border-red-200">
+          <XCircle className="w-3 h-3" />
+          Payment Required
+        </span>
+      );
+    } else if (vendor.status === "pending") {
+      return (
+        <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium border border-yellow-200">
+          <Clock className="w-3 h-3" />
+          Awaiting Approval
+        </span>
+      );
+    } else {
+      return getStatusBadge(vendor.status);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -266,7 +244,6 @@ const AdminDashboard = () => {
         console.log("Fetched users:", allUsersResponse.data);
         console.log("Fetched vendors:", allVendorsResponse.data);
 
-        // Transform the API data to match component structure
         const transformedUsers = transformUserData(allUsersResponse.data);
         const transformedVendors = transformVendorData(allVendorsResponse.data);
 
@@ -284,19 +261,23 @@ const AdminDashboard = () => {
   }, []);
 
   // Filter out users who are already vendors from the users list
-  // Now we check for users who have vendor role but don't have approved vendor accounts
-  const regularUsers = users.filter((user) => !user.roles?.includes("vendor"));
+  const regularUsers = users.filter((user) => !user.vendorRequest);
 
-  // Find users with pending vendor requests (users who have vendor accounts but aren't approved yet)
+  // Find users with pending vendor requests
   const pendingVendors = vendors.filter(
-    (vendor) => vendor.status === "pending"
+    (vendor) => vendor.status === "pending" && vendor.isEntryFeePaid
   );
+
+  // Find vendors who haven't paid entry fee
+  const unpaidVendors = vendors.filter((vendor) => !vendor.isEntryFeePaid);
 
   // Stats calculation
   const totalUsers = regularUsers.length;
   const totalVendors = vendors.length;
   const pendingRequests = pendingVendors.length;
   const activeVendors = vendors.filter((v) => v.status === "active").length;
+  const paidVendors = vendors.filter((v) => v.isEntryFeePaid).length;
+  const unpaidCount = unpaidVendors.length;
 
   if (loading) {
     return (
@@ -340,56 +321,82 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-blue-600">{totalUsers}</p>
+                <p className="text-xs font-medium text-gray-600">Total Users</p>
+                <p className="text-xl font-bold text-blue-600">{totalUsers}</p>
               </div>
-              <Users className="w-8 h-8 text-blue-500" />
+              <Users className="w-6 h-6 text-blue-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Total Vendors
-                </p>
-                <p className="text-2xl font-bold text-green-600">
+                <p className="text-xs font-medium text-gray-600">All Vendors</p>
+                <p className="text-xl font-bold text-green-600">
                   {totalVendors}
                 </p>
               </div>
-              <Store className="w-8 h-8 text-green-500" />
+              <Store className="w-6 h-6 text-green-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
-                  Pending Requests
+                <p className="text-xs font-medium text-gray-600">
+                  Paid Vendors
                 </p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-xl font-bold text-purple-600">
+                  {paidVendors}
+                </p>
+              </div>
+              <CheckCircle className="w-6 h-6 text-purple-500" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-600">
+                  Unpaid Vendors
+                </p>
+                <p className="text-xl font-bold text-orange-600">
+                  {unpaidCount}
+                </p>
+              </div>
+              <XCircle className="w-6 h-6 text-orange-500" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm border p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-medium text-gray-600">
+                  Pending Approval
+                </p>
+                <p className="text-xl font-bold text-yellow-600">
                   {pendingRequests}
                 </p>
               </div>
-              <AlertCircle className="w-8 h-8 text-orange-500" />
+              <Clock className="w-6 h-6 text-yellow-500" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm border p-6">
+          <div className="bg-white rounded-lg shadow-sm border p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">
+                <p className="text-xs font-medium text-gray-600">
                   Active Vendors
                 </p>
-                <p className="text-2xl font-bold text-purple-600">
+                <p className="text-xl font-bold text-indigo-600">
                   {activeVendors}
                 </p>
               </div>
-              <CheckSquare className="w-8 h-8 text-purple-500" />
+              <CheckSquare className="w-6 h-6 text-indigo-500" />
             </div>
           </div>
         </div>
@@ -528,12 +535,20 @@ const AdminDashboard = () => {
                   <h2 className="text-xl font-semibold text-gray-900">
                     Vendors Management
                   </h2>
-                  {pendingRequests > 0 && (
-                    <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
-                      {pendingRequests} vendor approval
-                      {pendingRequests !== 1 ? "s" : ""} pending
-                    </span>
-                  )}
+                  <div className="flex gap-2">
+                    {unpaidCount > 0 && (
+                      <span className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {unpaidCount} unpaid vendor
+                        {unpaidCount !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {pendingRequests > 0 && (
+                      <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {pendingRequests} approval
+                        {pendingRequests !== 1 ? "s" : ""} pending
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -545,6 +560,9 @@ const AdminDashboard = () => {
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Business
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Payment Status
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Performance
@@ -603,6 +621,21 @@ const AdminDashboard = () => {
                             </div>
                           </td>
                           <td className="px-4 py-4">
+                            <div className="space-y-2">
+                              {getPaymentStatusBadge(vendor.isEntryFeePaid)}
+                              {vendor.isEntryFeePaid && vendor.paymentDate && (
+                                <div className="text-xs text-gray-500">
+                                  Paid on: {formatDate(vendor.paymentDate)}
+                                </div>
+                              )}
+                              {vendor.paymentReference && (
+                                <div className="text-xs text-gray-400 font-mono">
+                                  Ref: {vendor.paymentReference.slice(-8)}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
                             <div className="space-y-1">
                               <div className="text-sm text-gray-900 flex items-center gap-1">
                                 <Star className="w-3 h-3 text-yellow-400" />
@@ -628,7 +661,7 @@ const AdminDashboard = () => {
                             </div>
                           </td>
                           <td className="px-4 py-4">
-                            {getStatusBadge(vendor.status)}
+                            {getVendorStatusBadge(vendor)}
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex gap-2">
@@ -641,7 +674,8 @@ const AdminDashboard = () => {
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              {vendor.status === "pending" ? (
+                              {vendor.isEntryFeePaid &&
+                              vendor.status === "pending" ? (
                                 <>
                                   <button
                                     onClick={() =>
@@ -653,7 +687,7 @@ const AdminDashboard = () => {
                                     <CheckSquare className="w-3 h-3" />
                                     Approve
                                   </button>
-                                  <button
+                                  {/* <button
                                     onClick={() =>
                                       changeVendorStatus(vendor.id, false)
                                     }
@@ -662,9 +696,10 @@ const AdminDashboard = () => {
                                   >
                                     <X className="w-3 h-3" />
                                     Reject
-                                  </button>
+                                  </button> */}
                                 </>
-                              ) : vendor.status === "active" ? (
+                              ) : vendor.isEntryFeePaid &&
+                                vendor.status === "active" ? (
                                 <button
                                   onClick={() =>
                                     changeVendorStatus(vendor.id, false)
@@ -674,7 +709,8 @@ const AdminDashboard = () => {
                                 >
                                   Suspend
                                 </button>
-                              ) : vendor.status === "suspended" ? (
+                              ) : vendor.isEntryFeePaid &&
+                                vendor.status === "suspended" ? (
                                 <button
                                   onClick={() =>
                                     changeVendorStatus(vendor.id, true)
@@ -769,11 +805,51 @@ const AdminDashboard = () => {
                         Status
                       </label>
                       <div className="mt-1">
-                        {getStatusBadge(selectedItem.status)}
+                        {getVendorStatusBadge(selectedItem)}
                       </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Payment Information for Vendors */}
+                {selectedItem.type === "vendor" && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">
+                      Payment Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-500">
+                          Entry Fee Status
+                        </label>
+                        <div className="mt-1">
+                          {getPaymentStatusBadge(selectedItem.isEntryFeePaid)}
+                        </div>
+                      </div>
+                      {selectedItem.isEntryFeePaid &&
+                        selectedItem.paymentDate && (
+                          <div>
+                            <label className="text-sm font-medium text-gray-500">
+                              Payment Date
+                            </label>
+                            <p className="text-gray-900">
+                              {formatDate(selectedItem.paymentDate)}
+                            </p>
+                          </div>
+                        )}
+                      {selectedItem.paymentReference && (
+                        <div className="md:col-span-2">
+                          <label className="text-sm font-medium text-gray-500">
+                            Payment Reference
+                          </label>
+                          <p className="text-gray-900 font-mono text-sm">
+                            {selectedItem.paymentReference}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* User specific info */}
                 {selectedItem.type === "user" && (

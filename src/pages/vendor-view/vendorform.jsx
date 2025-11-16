@@ -17,6 +17,16 @@ const VendorForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check if all required fields are filled
+  const isFormValid =
+    storeName.trim() !== "" &&
+    storeDescription.trim() !== "" &&
+    bankCode !== "" &&
+    accountNumber.trim() !== "" &&
+    accountNumber.trim().length === 10 && // Assuming 10-digit account number
+    logo !== null &&
+    businessCertificate !== null;
+
   useEffect(() => {
     // Fetch bank list from your backend (which fetches from Paystack)
     const fetchBanks = async () => {
@@ -32,6 +42,16 @@ const VendorForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Double check form validity before submitting
+    if (!isFormValid) {
+      toast({
+        title: "Please fill all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -100,6 +120,7 @@ const VendorForm = () => {
           value={storeDescription}
           onChange={(e) => setStoreDescription(e.target.value)}
           rows={4}
+          required
           className="w-full border p-2 rounded mt-1"
         />
       </label>
@@ -139,6 +160,7 @@ const VendorForm = () => {
           type="file"
           accept="image/*"
           onChange={(e) => setLogo(e.target.files[0])}
+          required
           className="w-full mt-1"
         />
       </label>
@@ -149,17 +171,29 @@ const VendorForm = () => {
           type="file"
           accept=".pdf,image/*"
           onChange={(e) => setBusinessCertificate(e.target.files[0])}
+          required
           className="w-full mt-1"
         />
       </label>
 
       <button
         type="submit"
-        disabled={loading}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        disabled={loading || !isFormValid}
+        className={`px-4 py-2 rounded ${
+          loading || !isFormValid
+            ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
+        }`}
       >
         {loading ? "Saving..." : "Save Vendor"}
       </button>
+
+      {/* Optional: Show validation message */}
+      {!isFormValid && (
+        <p className="text-sm text-gray-500 mt-2">
+          Please fill all fields to enable the Save Vendor button
+        </p>
+      )}
     </form>
   );
 };
