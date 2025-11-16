@@ -188,7 +188,7 @@ const VendorForm = () => {
         {loading ? "Saving..." : "Save Vendor"}
       </button>
 
-      {/* Optional: Show validation message */}
+      {/* Optional: Show validation message (update)*/}
       {!isFormValid && (
         <p className="text-sm text-gray-500 mt-2">
           Please fill all fields to enable the Save Vendor button
