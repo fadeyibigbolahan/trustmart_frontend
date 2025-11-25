@@ -674,8 +674,7 @@ const AdminDashboard = () => {
                               >
                                 <Eye className="w-4 h-4" />
                               </button>
-                              {vendor.isEntryFeePaid &&
-                              vendor.status === "pending" ? (
+                              {vendor.status === "pending" ? (
                                 <>
                                   <button
                                     onClick={() =>
